@@ -23,6 +23,19 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    public Task update(Long ownerId, Long taskId, String title, String description) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found: " + taskId));
+
+        if (!task.getOwnerId().equals(ownerId)) {
+            throw new NoSuchElementException("Task not found: " + taskId);
+        }
+
+        task.setTitle(title);
+        task.setDescription(description);
+        return taskRepository.save(task);
+    }
+
     public Task markCompleted(Long ownerId, Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NoSuchElementException("Task not found: " + taskId));

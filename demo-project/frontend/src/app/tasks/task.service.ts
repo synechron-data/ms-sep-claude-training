@@ -25,6 +25,10 @@ export class TaskService {
     return this.http.post<Task>(this.baseUrl, { title, description });
   }
 
+  update(id: number, title: string, description: string): Observable<Task> {
+    return this.http.put<Task>(`${this.baseUrl}/${id}`, { title, description });
+  }
+
   complete(id: number): Observable<Task> {
     return this.http.patch<Task>(`${this.baseUrl}/${id}/complete`, {});
   }

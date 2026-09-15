@@ -19,11 +19,22 @@ import { Task, TaskService } from './task.service';
 
       <ul>
         <li *ngFor="let task of tasks" [class.completed]="task.completed">
-          <span>{{ task.title }}</span>
-          <div class="actions">
-            <button *ngIf="!task.completed" (click)="complete(task)">Complete</button>
-            <button (click)="remove(task)">Delete</button>
-          </div>
+          <ng-container *ngIf="editingTaskId === task.id; else viewMode">
+            <input [(ngModel)]="editTitle" placeholder="Task title" />
+            <input [(ngModel)]="editDescription" placeholder="Description" />
+            <div class="actions">
+              <button (click)="saveEdit(task)">Save</button>
+              <button (click)="cancelEdit()">Cancel</button>
+            </div>
+          </ng-container>
+          <ng-template #viewMode>
+            <span>{{ task.title }}</span>
+            <div class="actions">
+              <button *ngIf="!task.completed" (click)="complete(task)">Complete</button>
+              <button (click)="startEdit(task)">Edit</button>
+              <button (click)="remove(task)">Delete</button>
+            </div>
+          </ng-template>
         </li>
       </ul>
     </div>
@@ -43,6 +54,10 @@ export class TaskListComponent implements OnInit {
   tasks: Task[] = [];
   newTitle = '';
   newDescription = '';
+
+  editingTaskId: number | null = null;
+  editTitle = '';
+  editDescription = '';
 
   constructor(private taskService: TaskService) {}
 
@@ -71,5 +86,25 @@ export class TaskListComponent implements OnInit {
 
   remove(task: Task): void {
     this.taskService.delete(task.id).subscribe(() => this.refresh());
+  }
+
+  startEdit(task: Task): void {
+    this.editingTaskId = task.id;
+    this.editTitle = task.title;
+    this.editDescription = task.description;
+  }
+
+  cancelEdit(): void {
+    this.editingTaskId = null;
+  }
+
+  saveEdit(task: Task): void {
+    if (!this.editTitle.trim()) {
+      return;
+    }
+    this.taskService.update(task.id, this.editTitle, this.editDescription).subscribe(() => {
+      this.editingTaskId = null;
+      this.refresh();
+    });
   }
 }

@@ -26,6 +26,12 @@ public class TaskController {
         return taskService.create(ownerId, request.title(), request.description());
     }
 
+    @PutMapping("/{id}")
+    public Task update(@AuthenticationPrincipal Long ownerId, @PathVariable Long id,
+                        @RequestBody UpdateTaskRequest request) {
+        return taskService.update(ownerId, id, request.title(), request.description());
+    }
+
     @PatchMapping("/{id}/complete")
     public Task complete(@AuthenticationPrincipal Long ownerId, @PathVariable Long id) {
         return taskService.markCompleted(ownerId, id);
@@ -37,5 +43,8 @@ public class TaskController {
     }
 
     public record CreateTaskRequest(@NotBlank String title, String description) {
+    }
+
+    public record UpdateTaskRequest(@NotBlank String title, String description) {
     }
 }
