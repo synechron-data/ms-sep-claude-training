@@ -18,6 +18,10 @@ public class TaskService {
         return taskRepository.findByOwnerId(ownerId);
     }
 
+    public List<Task> listCompletedForOwner(Long ownerId) {
+        return taskRepository.findByOwnerIdAndCompletedTrue(ownerId);
+    }
+
     public Task create(Long ownerId, String title, String description) {
         Task task = new Task(title, description, ownerId);
         return taskRepository.save(task);

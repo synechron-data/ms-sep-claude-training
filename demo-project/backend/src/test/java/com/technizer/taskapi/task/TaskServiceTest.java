@@ -9,6 +9,7 @@ package com.technizer.taskapi.task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -53,6 +54,18 @@ class TaskServiceTest {
 
         assertThatThrownBy(() -> taskService.update(1L, 99L, "New title", "New description"))
                 .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void listCompletedForOwnerReturnsOnlyCompletedTasksFromRepository() {
+        Task completed = new Task("Completed task", "Description", 1L);
+        completed.setId(10L);
+        completed.setCompleted(true);
+        when(taskRepository.findByOwnerIdAndCompletedTrue(1L)).thenReturn(List.of(completed));
+
+        List<Task> result = taskService.listCompletedForOwner(1L);
+
+        assertThat(result).containsExactly(completed);
     }
 
     @Test
