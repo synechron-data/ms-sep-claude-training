@@ -1,6 +1,5 @@
 # Claude Code — Built-in Tools Reference (Updated)
 
-> **Source:** Corrected from `claude-code-tools-reference.pdf` (last verified May 2026) after validation against the actual tool set available in a live Claude Code session.
 > **Last updated:** September 2026
 > **Change summary:** Several tools described in the original PDF don't exist in the current build (`LSP`, `TaskCreate`/`TaskGet`/`TaskList`/`TaskUpdate`, `TeamCreate`/`TeamDelete`, `TodoWrite`); several real tools were missing entirely; and a few gating/behavior descriptions were stale. See "What Changed" at the bottom.
 

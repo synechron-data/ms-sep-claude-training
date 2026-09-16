@@ -2,7 +2,6 @@
 
 ## Which Model to Use & When to Switch
 
-> **Source:** Corrected from `claude-code-models-guide.pdf` (dated April 2026) after validation against current Anthropic model data.
 > **Last updated:** September 2026
 > **Change summary:** The original PDF was one generation stale — `sonnet` and `opus` aliases have since moved from the 4.6 line to the 5 line. See "What Changed" at the bottom.
 
