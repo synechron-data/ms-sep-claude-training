@@ -1,6 +1,7 @@
 package com.technizer.taskapi.config;
 
 import com.technizer.taskapi.auth.JwtAuthFilter;
+import com.technizer.taskapi.auth.RateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,9 +22,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, RateLimitFilter rateLimitFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.rateLimitFilter = rateLimitFilter;
     }
 
     @Bean
@@ -42,7 +45,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, JwtAuthFilter.class);
 
         return http.build();
     }

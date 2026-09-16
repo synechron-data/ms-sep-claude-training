@@ -24,10 +24,13 @@ Package-by-feature under `src/main/java/com/technizer/taskapi/`: `auth/`, `task/
 
 - **Auth flow:** `AuthController` → `AuthService` (registers/authenticates against
   `UserRepository`, hashes passwords with `BCryptPasswordEncoder`) → `JwtUtil` issues
-  a JWT whose subject is the user id. `JwtAuthFilter` runs before
-  `UsernamePasswordAuthenticationFilter` on every request, extracts the bearer token,
-  and populates the `SecurityContext` from the user id in the token. Auth is fully
-  stateless — no server-side session.
+  a JWT whose subject is the user id. `RateLimitFilter` runs before `JwtAuthFilter` in
+  the security chain and enforces 5 requests/minute per client IP on `/api/auth/**`,
+  returning `429` with a small JSON error body when the limit is exceeded (in-memory
+  token buckets via `bucket4j-core`, keyed by `X-Forwarded-For`/remote address).
+  `JwtAuthFilter` runs before `UsernamePasswordAuthenticationFilter` on every request,
+  extracts the bearer token, and populates the `SecurityContext` from the user id in
+  the token. Auth is fully stateless — no server-side session.
 - **Authorization:** `SecurityConfig` permits `/api/auth/**` and `/h2-console/**` and
   requires authentication for everything else. There are no role/permission checks —
   any authenticated user is equivalent; per-resource ownership must be enforced
