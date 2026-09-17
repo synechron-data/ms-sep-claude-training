@@ -16,6 +16,10 @@ frontend/.angular/
 # OS
 .DS_Store
 
+# Python (Spec Kit scripts)
+__pycache__/
+*.pyc
+
 # Claude Code
 .claude/*.lock
 *.MEMORY.md
