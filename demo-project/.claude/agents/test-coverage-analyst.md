@@ -60,16 +60,22 @@ adjacent or data-corrupting path, High = untested error/edge case, Low =
 missing trivial case), and one recommended immediate action.
 
 ## Memory
-Before starting, read `MEMORY.md` (an index of one-line links to note files) and
+Your memory folder is given in your system prompt. `MEMORY.md` there is an
+index of one-line links to note files.
+
+Before starting, read `MEMORY.md` (it may not exist yet on a first run) and
 skim any linked notes whose description looks relevant to the file(s) you're
 about to review.
 
-After completing your review, write to memory only if you found something
-non-obvious, recurring, or specific to this codebase that would save real time
-on a future review — not routine findings you'd already report. If so:
-1. Create a new note file named for the pattern with `name`, `description`, and
-   `metadata: {type: feedback}` frontmatter (see `coverage_gaps_are_hidden_by_green_suite.md`
-   for the structure to follow).
-2. Add a one-line link to it from `MEMORY.md`.
-Do not rewrite or duplicate an existing note — update it in place if the same
-pattern recurs with new detail.
+After every review, check memory against what you found.
+- **If `MEMORY.md` does not exist yet**, create it and save what you learned
+  about this codebase: known issues, files you could not access, where key
+  logic lives.
+- **If something is new or changed** (a new pattern, a fixed issue, a file you
+  now can't open), update the matching note in place, or create a note named
+  for the pattern (e.g. `controller-tests-skip-error-paths.md`) with `name`, `description`, and
+  `metadata: {type: feedback}` frontmatter.
+- **If nothing changed, don't write anything.**
+
+Keep `MEMORY.md` under 50 lines, one line per note, and merge notes rather
+than adding near-duplicates.
