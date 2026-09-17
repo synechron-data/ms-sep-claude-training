@@ -1,274 +1,261 @@
-# Claude Code — Models Guide (Updated)
+# Claude Code — Models Guide
 
 ## Which Model to Use & When to Switch
 
-> **Last updated:** September 2026
-> **Change summary:** The original PDF was one generation stale — `sonnet` and `opus` aliases have since moved from the 4.6 line to the 5 line. See "What Changed" at the bottom.
+> **Source:** Official model configuration docs ([code.claude.com/docs/en/model-config](https://code.claude.com/docs/en/model-config)).
+> **Last verified:** September 2026
 
 ## Available Models at a Glance
 
-| Alias | Current Model | Context Window | Best For |
+| Alias | Current Model (Anthropic API) | Context Window | Best For |
 |---|---|---|---|
-| `sonnet` | Claude Sonnet 5 | 1M (native) | Daily coding — the default |
-| `opus` / `best` | Claude Opus 5 | 1M (native) | Complex reasoning, deep analysis |
+| `fable` | Claude Fable 5.1 | 1M | Hardest, longest-running tasks — ambiguous investigations, architecture, outage debugging |
+| `best` | Fable where it's available to you, otherwise the same as `opus` | — | "Give me the most capable model I have" |
+| `opus` | Claude Opus 5 | 1M (see Extended Context) | Complex reasoning, deep analysis |
+| `sonnet` | Claude Sonnet 5 | 1M on every plan | Daily coding |
 | `haiku` | Claude Haiku 4.5 | 200K | Fast, simple, cheap tasks |
-| `sonnet[1m]` | Sonnet 5 (1M context) | 1M | Very long sessions, large codebases |
-| `opus[1m]` | Opus 5 (1M context) | 1M | Same but with Opus reasoning depth |
-| `opusplan` | Opus → Sonnet hybrid | — | Plan with Opus, execute with Sonnet |
+| `opus[1m]` / `sonnet[1m]` | 1M-context variants | 1M | Explicit 1M selection (`sonnet[1m]` has no effect on the Anthropic API — Sonnet 5 is always 1M) |
+| `opusplan` | Opus in plan mode → Sonnet for execution | — | Plan with Opus, execute with Sonnet |
+| `default` | Clears any override → your account's default model | — | Resetting |
 
-Aliases always point to the latest version. To pin a specific version, use the full model name (e.g. `claude-opus-5`).
+Aliases point to the recommended version and update over time. To pin a version, use the full model ID (e.g. `claude-opus-5`) or `ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` / `ANTHROPIC_DEFAULT_HAIKU_MODEL` / `ANTHROPIC_DEFAULT_FABLE_MODEL`.
+
+### Aliases differ by provider
+
+| Provider | `opus` | `sonnet` |
+|---|---|---|
+| Anthropic API | Opus 5 | Sonnet 5 |
+| Claude Platform on AWS | Opus 5 | Sonnet 4.6 |
+| Amazon Bedrock, Google Cloud's Agent Platform | Opus 5 | Sonnet 4.5 |
+| Microsoft Foundry | Opus 4.6 | Sonnet 4.5 |
+
+If you run Claude Code against a cloud provider, check `/status` rather than assuming the Anthropic API mapping.
+
+### Default model by account
+
+| Account | Default model |
+|---|---|
+| Max, Team Premium, Enterprise, Anthropic API | Opus 5 |
+| Claude Platform on AWS, Bedrock, Google Cloud's Agent Platform | Opus 5 |
+| Pro, Team Standard | Sonnet 5 |
+| Microsoft Foundry | Sonnet 4.5 |
+
+Fable is never the default — select it explicitly with `/model fable`. On subscription plans, Fable requests can bill usage credits; Claude Code asks for consent first in interactive sessions.
 
 ## Full Model IDs (Pinned Versions)
 
-Use these when you need version stability — enterprise deployments, reproducible workflows, or environment variable configuration.
-
 ```
+claude-fable-5-1
+claude-fable-5
 claude-opus-5
 claude-sonnet-5
 claude-haiku-4-5-20251001
 
-# Previous-generation, still valid if explicitly pinned:
+# Other models you can pin explicitly:
+claude-opus-4-8
+claude-opus-4-7
 claude-opus-4-6
 claude-sonnet-4-6
 claude-sonnet-4-5-20250929
 claude-opus-4-5-20251101
 ```
 
-**Do not append date suffixes to the current-generation IDs** (`claude-opus-5`, `claude-sonnet-5`) — unlike older snapshots, these are not dated releases.
+Minimum Claude Code versions: Opus 5 needs v2.1.219+, Sonnet 5 needs v2.1.197+. Run `claude update` if an alias doesn't resolve as expected.
 
 ## What Each Model Is Actually Like
 
+### 🟣 Fable 5.1 — The Long-Haul Specialist
+
+The most capable models in Claude Code, suited to work bigger than a single sitting. They sustain long autonomous sessions, investigate before acting, and verify their own work more often.
+
+**What it handles well:**
+- Ambiguous root-cause investigations and outage debugging
+- Architecture decisions with many trade-offs
+- Large, multi-step changes you want done with minimal hand-holding
+
+**When Fable is the right choice:** When the problem is open-ended or long-running, and you'd rather Claude investigate thoroughly than move fast. Skip "remember to test it" reminders — it verifies on its own.
+
 ### 🔵 Sonnet 5 — Your Daily Driver
 
-The default for a reason. Strong reasoning applied to everyday work — fast enough for real-time collaboration, capable enough that most problems won't outgrow it.
+Strong reasoning applied to everyday work — fast enough for real-time collaboration, capable enough that most problems won't outgrow it.
 
 **What it handles well:**
 - Writing new features and components
-- Fixing standard bugs
-- Refactoring code
-- Writing tests
-- Generating documentation
+- Fixing standard bugs and refactoring
+- Writing tests and documentation
 - PR creation and code reviews
-- Computer use and vision tasks
-- Document and spreadsheet creation
 
-**When Sonnet is the right choice:** If you're not sure, start here. Most coding tasks don't require anything more.
+**When Sonnet is the right choice:** If you're not sure, start here.
 
 ### 🟠 Opus 5 — The Deep Thinker
 
-Exceptional for specialized complex tasks requiring advanced reasoning. Built for problems that genuinely need sustained, deep thinking. Uses more of your rate limit — reserve it for tasks that truly need it.
+For complex tasks that need sustained reasoning. Uses more of your plan's limits — reserve it for work that needs it.
 
 **What it handles well:**
-- Hard bugs — especially intermittent, race conditions, concurrency issues
+- Hard bugs — intermittent, race conditions, concurrency
 - Architecture and system design decisions
-- Evaluating trade-offs between multiple approaches
 - Security audits and vulnerability analysis
 - Complex multi-file refactors with deep interdependencies
 - Understanding unfamiliar or legacy codebases
-- Multi-agent coordination (Agent Teams)
-- Tasks requiring 1M context — entire repositories, massive codebases
 
-**When Opus is the right choice:** When Sonnet has tried twice and keeps going off-track, or when you need sustained reasoning across a very long context.
+**When Opus is the right choice:** When Sonnet has tried twice and keeps going off-track.
 
 ### 🟢 Haiku 4.5 — The Sprinter
 
-Fast, lightweight, and efficient with your rate limit. Still the current Haiku generation — no Haiku 5 has shipped. Built for everyday quick requests.
+Fast and light on your limits. Still the current Haiku generation. Haiku 4.5 does **not** support effort levels.
 
 **What it handles well:**
-- Bulk find-and-replace operations (updating copyright headers, renaming variables)
-- Simple lookups ("what's the syntax for X?")
-- Quick summaries and short answers
-- File formatting and linting passes
-- Scaffolding boilerplate
-- Tasks where speed matters more than depth
+- Bulk mechanical edits (copyright headers, renames)
+- Simple lookups and short answers
+- Formatting passes and boilerplate
 
-**When Haiku is the right choice:** When the task is mechanical, repetitive, or doesn't require judgment. Using Opus on a task Haiku could handle wastes tokens and slows you down.
+**When Haiku is the right choice:** When the task is mechanical and doesn't need judgment.
 
-### 🔄 opusplan — The Intelligent Hybrid
+### 🔄 opusplan — The Hybrid
 
-A special mode built into Claude Code. Uses Opus during Plan Mode for deep reasoning and architecture decisions, then automatically switches to Sonnet for code generation and implementation.
+Uses `opus` during plan mode, then switches to `sonnet` for execution.
 
-**What it handles well:**
-- Large feature implementations where you want a thorough plan but fast execution
-- Complex migrations (e.g. OAuth2 migration, API version upgrades)
-- Refactors that touch many files
-- Any work where planning quality matters more than execution cost
-
-**How to use it:**
 ```
 claude --model opusplan
 # or mid-session:
 /model opusplan
 ```
 
+To force 1M context in both phases when your plan doesn't upgrade Opus automatically, use `opusplan[1m]`.
+
 ## How to Switch Models — All Methods
 
-**1. Mid-Session (Most Common)**
+**1. Mid-session (most common)**
 ```
-/model sonnet       # switch to Sonnet
-/model opus         # switch to Opus
-/model haiku         # switch to Haiku
-/model opusplan      # enable plan/execute hybrid
-/model default       # revert to your plan's default
+/model sonnet       # switch and save as your default
+/model opus
+/model haiku
+/model fable
+/model opusplan
+/model default      # back to your account's default
+/model              # picker: Enter saves as default, s = this session only,
+                    # left/right arrows adjust effort
 ```
-Inside `/model`, use left/right arrow keys to also adjust the effort level for the selected model.
+Shortcut: `Option+P` (macOS) / `Alt+P` (Windows/Linux) switches model without clearing your prompt.
 
-**2. At Startup (For a Specific Session)**
+**2. At startup (this session only)**
 ```
 claude --model opus
-claude --model sonnet
-claude --model haiku
-claude --model opusplan
-claude --model claude-opus-5   # pinned version
+claude --model fable
+claude --model claude-opus-5    # pinned version
 ```
 
-**3. Environment Variable (Persistent Default)**
+**3. Environment variables**
 ```
-export ANTHROPIC_MODEL="opus"   # or sonnet, haiku
-echo 'export ANTHROPIC_MODEL="sonnet"' >> ~/.zshrc
-source ~/.zshrc
+export ANTHROPIC_MODEL="opus"            # forces this model at every launch
+export ANTHROPIC_DEFAULT_MODEL="sonnet"  # default for new sessions, unless /model, --model,
+                                         # settings, or an org default choose one (v2.1.236+)
 ```
 
-**4. Settings File (Project or Global)**
+**4. Settings file**
 ```jsonc
-// .claude/settings.json (project-level)
-// ~/.claude/settings.json (global)
+// .claude/settings.json (project) or ~/.claude/settings.json (user)
 {
   "model": "sonnet"
 }
 ```
+`model` sets the *initial* selection; users can still switch with `/model`. Admins who need enforcement use `availableModels` + `enforceAvailableModels` in managed settings.
 
-**5. One-Shot / Headless Command**
+**5. One-shot / headless**
 ```
 claude --model opus -p "Analyse this architecture and suggest improvements"
 claude --model haiku -p "Update copyright year to 2026 in all files"
 ```
 
-## Effort Levels — Independent from Model
+## Effort Levels — Independent From Model
 
-Effort level and model choice are separate controls. You can have Sonnet at max effort, or Opus at low effort.
+Effort controls adaptive reasoning: how much the model thinks on each step.
 
-| Level | Behaviour | Persists Across Sessions |
+| Model | Supported levels |
+|---|---|
+| Fable 5.1, Fable 5 | `low`, `medium`, `high`, `xhigh`, `max` |
+| Opus 5, Sonnet 5, Opus 4.8, Opus 4.7 | `low`, `medium`, `high`, `xhigh`, `max` |
+| Opus 4.6, Sonnet 4.6 | `low`, `medium`, `high`, `max` |
+| Haiku 4.5 | not supported |
+
+| Level | When to use it | Persists |
 |---|---|---|
-| `low` | Fast, less thorough | Yes |
-| `medium` | Default for Pro/Max | Yes |
-| `high` | Deep reasoning; overall default | Yes |
-| `xhigh` | Deep reasoning, higher token usage — best for most coding/agentic work on current-gen models | Yes |
-| `max` | Maximum, prone to overthinking — use sparingly | No (current session only) |
-| `auto` | Reset to model default | — |
+| `low` | Short, scoped, latency-sensitive tasks | Saved when confirmed with `Enter` (press `s` for this session only) |
+| `medium` | Cost-sensitive work that can trade some intelligence | Same |
+| `high` | **The default on every effort-capable model** except Opus 4.7 | Same |
+| `xhigh` | Deeper reasoning at higher token spend; the default on Opus 4.7 | Same |
+| `max` | Deepest; diminishing returns and prone to overthinking — test first | **Session only** (unless set via `CLAUDE_CODE_EFFORT_LEVEL`) |
+| `ultracode` | Claude Code setting: `xhigh` plus dynamic workflows for substantive tasks | Session only via `/effort` |
+| `auto` | Reset to the model default | — |
 
 ```
-/effort low
-/effort medium
-/effort high
-/effort xhigh
-/effort max
-/effort auto        # reset to default
+/effort low | medium | high | xhigh | max | ultracode | auto | status
+claude --effort xhigh
 ```
 
-`xhigh` and `max` are available on current-generation models (Sonnet 5, Opus 5), not just Opus — the original guide's "max = Opus 4.6 only" restriction no longer applies.
-
-**Default effort by plan:**
-- Pro and Max subscribers → `medium` effort
-- API key, Team, Enterprise, Bedrock/Vertex users → `high` effort
+If you pick a level the model doesn't support, Claude Code uses the highest supported level below it (e.g. `xhigh` runs as `high` on Opus 4.6).
 
 ## The `ultrathink` Keyword
 
-> Claude Code only — does not work in claude.ai chat or the API.
-
-Adding `ultrathink` anywhere in a prompt triggers high effort for that single turn, then reverts to the session default.
+Include `ultrathink` anywhere in a prompt to ask for deeper reasoning **on that turn only**. Claude Code adds an in-context instruction; the **effort level sent to the API does not change**. "think" / "think hard" are passed through as ordinary words.
 
 ```
 ultrathink — why is this auth flow failing intermittently?
-Analyse this microservice architecture and find failure points. ultrathink.
 ```
 
-| Method | Scope | Best When |
+| Method | Scope | Best when |
 |---|---|---|
-| `ultrathink` in prompt | Single turn only | Mid-conversation, one hard problem |
-| `/effort high` | Whole session | Want deep reasoning throughout |
-| `/effort max` | Whole session | Hardest problems, entire session |
+| `ultrathink` in the prompt | One turn | One hard question mid-conversation |
+| `/effort xhigh` | Saved default | You want deeper reasoning throughout |
+| `/effort max` | Current session | Hardest problems — use sparingly |
+
+## Extended Thinking
+
+- Fable models, Sonnet 5, and Opus 4.7+ always use adaptive reasoning. `MAX_THINKING_TOKENS` (non-zero) and `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` only apply to Opus 4.6 / Sonnet 4.6.
+- `MAX_THINKING_TOKENS=0` turns thinking off on the Anthropic API — except on Fable, where thinking can't be turned off.
+- `Option+T` / `Alt+T` toggles extended thinking for the session (no effect on Fable).
 
 ## When to Switch — Decision Guide
 
-**Stay on Sonnet when:**
-- Writing new features or components
-- Fixing standard bugs
-- Refactoring code
-- Writing tests or documentation
-- Creating PRs and reviewing code
-- You want fast output without burning through rate limits
+**Stay on Sonnet when:** writing features, fixing standard bugs, refactoring, writing tests/docs, creating PRs, or you want fast output without burning limits.
 
-**Switch to Opus when:**
-- Debugging a hard, intermittent, or race-condition bug that Sonnet keeps missing
-- Designing a new architecture or evaluating design patterns
-- Analysing a large or unfamiliar codebase for the first time
-- Conducting a security audit or vulnerability review
-- You've tried Sonnet twice and it keeps going off-track
-- You need 1M context for an entire repository
+**Switch to Opus when:** a hard or intermittent bug keeps beating Sonnet, you're designing architecture, analysing an unfamiliar codebase, or running a security audit.
 
-**Switch to Haiku when:**
-- Updating boilerplate or copyright headers across many files
-- Simple find-and-replace-style tasks
-- Quick factual lookups
-- File formatting or linting passes
-- You're near a rate limit and need to conserve tokens
+**Switch to Fable when:** the task is open-ended and long-running, or you want Claude to investigate and verify with minimal steering.
 
-**Switch to opusplan when:**
-- Building a large feature that needs a thorough plan before any code
-- Running a complex migration across many files
-- You want Opus intelligence during planning but Sonnet speed during execution
+**Switch to Haiku when:** the work is mechanical (headers, renames, formatting), a quick lookup, or you're conserving limits.
+
+**Switch to opusplan when:** you want a thorough Opus plan and faster Sonnet execution for a large feature or migration.
 
 ## Rule of Thumb
 
-> Using Opus on a task Haiku could handle wastes tokens for no gain and slows you down.
-
-Start with Sonnet. Escalate to Opus only when you genuinely hit its ceiling. Drop to Haiku for anything mechanical or repetitive.
+> Start with Sonnet. Escalate to Opus (or Fable) only when you genuinely hit a ceiling. Drop to Haiku for anything mechanical.
 
 ## Environment Variables for Model Configuration
 
 ```bash
-# Set default model
-export ANTHROPIC_MODEL="sonnet"
-
-# Pin specific versions (for enterprise/Bedrock/Vertex stability)
-export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-5"
+export ANTHROPIC_MODEL="sonnet"                         # force a model at launch
+export ANTHROPIC_DEFAULT_MODEL="sonnet"                 # default for new sessions (v2.1.236+)
+export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-5"     # pin what the aliases resolve to
 export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-5"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5-20251001"
-
-# Set effort level persistently
-export CLAUDE_CODE_EFFORT_LEVEL="high"
-
-# Control thinking token budget (0 = disable thinking; legacy models only)
-export MAX_THINKING_TOKENS=31999
+export ANTHROPIC_DEFAULT_FABLE_MODEL="claude-fable-5-1"
+export CLAUDE_CODE_EFFORT_LEVEL="high"                  # force an effort level
+export CLAUDE_CODE_DISABLE_1M_CONTEXT=1                 # treat models as 200K
 ```
 
 ## Checking Your Current Model
 
 ```
-/status    # shows current model, effort level, account, version
-/model     # opens model picker — highlights currently active model
+/status     # version, model, account, connectivity
+/model      # picker highlights the active model
+/effort status
 ```
-
-The current effort level is also displayed next to the logo and spinner in the terminal (e.g. "with low effort") so you can confirm without opening `/model`.
 
 ## Extended Context (1M Tokens)
 
-- Sonnet 5 and Opus 5 now ship with a **1M-token context window natively** — the `[1m]` suffix aliases remain for explicit clarity, but plain `sonnet` / `opus` already default to 1M on supported plans.
-- Available on Max, Team, and Enterprise plans.
-- Useful for entire repositories, large codebase analysis, and long multi-file sessions.
-
----
-
-## What Changed From the Original PDF
-
-The source PDF (`claude-code-models-guide.pdf`, dated April 2026) was accurate as of that date but had gone one model generation stale by the time of this review (September 2026):
-
-1. **`sonnet` alias**: was Sonnet 4.6 → now **Sonnet 5**
-2. **`opus` / `best` alias**: was Opus 4.6 → now **Opus 5**
-3. **Full Model IDs list**: was missing `claude-sonnet-5` and `claude-opus-5` entirely
-4. **Effort levels**: the PDF listed only low/medium/high/max and said `max` was "Opus 4.6 only" — current-gen models add an `xhigh` level, and `xhigh`/`max` are no longer Opus-exclusive
-5. **`haiku` alias**: unchanged — Haiku 4.5 (`claude-haiku-4-5-20251001`) is still the current Haiku generation; no Haiku 5 has shipped
-6. **Mechanics unaffected**: `/model`, `/effort`, `opusplan`, `ultrathink`, env var patterns, and settings-file structure are all still accurate as described in the original
-
-**Caveat:** model aliasing can differ slightly by backend (Anthropic API vs. Claude Platform on AWS vs. Bedrock/Vertex vs. Foundry) — some third-party platforms lag the Anthropic API by a generation. If you're running Claude Code against Bedrock/Vertex/Foundry, verify your current alias mapping with `/status` rather than assuming parity with this table.
+- **Sonnet 5** always runs with a 1M window on the Anthropic API — every plan, no usage credits.
+- **Fable 5.1 / Fable 5** and **Opus 4.7+** run with 1M by default on the Anthropic API.
+- **Opus with 1M:** included on Max, Team (Standard and Premium seats), and Enterprise; **requires usage credits on Pro**; full access on API pay-as-you-go.
+- **Sonnet 4.6 with 1M** requires usage credits on every subscription plan.
+- No price premium for tokens beyond 200K. Turn 1M off with `CLAUDE_CODE_DISABLE_1M_CONTEXT=1`.

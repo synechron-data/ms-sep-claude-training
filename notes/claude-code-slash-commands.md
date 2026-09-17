@@ -1,232 +1,224 @@
-# Claude Code — Built-in Slash Commands Reference (Updated)
+# Claude Code — Built-in Slash Commands Reference
 
-> **Source:** Official docs (code.claude.com/docs), and current Anthropic model data.
-> **Last updated:** September 2026 (second pass — see "What Changed" at the bottom; a first validation pass introduced several unverified alias claims of its own, which this pass removes or flags).
-> **Change summary:** The model-alias and effort-level tables were one generation stale; several claimed command aliases turned out to be unconfirmed/incorrect against official docs; one command name had wrong spelling; `--remote` is deprecated (not absent). See "What Changed" at the bottom.
+> **Source:** Official commands reference ([code.claude.com/docs/en/commands](https://code.claude.com/docs/en/commands)), model configuration, interactive-mode, sessions, and CLI reference pages.
+> **Last verified:** September 2026 (Claude Code v2.1.2xx)
+> **Note:** Commands marked **[Skill]** are bundled skills (prompt-based). Not every command appears for every user — availability depends on platform, plan, and provider. Run `/help` in a session to see your own list.
 
 ## Session & Context Management
 
 | Command | Purpose |
 |---|---|
-| `/clear` | Clear conversation history and free up context. Aliases: `/reset`, `/new` |
-| `/compact [instructions]` | Compact conversation with optional focus instructions (e.g., `/compact keep architecture decisions`) |
-| `/context` | Visualize current context usage as a colored grid. Shows optimization suggestions and capacity warnings |
-| `/btw <question>` | Ask a quick side question without adding it to the main conversation thread |
-| `/rewind` | Rewind the conversation and/or code to a previous checkpoint. **No confirmed alias** — `/checkpoint` is not listed in official docs; drop that claim |
-| `/resume [session]` | Resume a past session by ID or name, or open a session picker. **No confirmed alias** — `/continue` is not a slash command in official docs |
-| `/rename [name]` | Rename the current session. Without a name, auto-generates one from conversation history |
-| `/branch [name]` | Create a branch (fork) of the current conversation at this point. **No confirmed alias** — `/fork` was an alias in older versions (v2.1.77–v2.1.161) but is not current |
-| `/export [filename]` | Export the current conversation as plain text. Without filename, opens dialog to copy or save |
-| `/copy [N]` | Copy the last assistant response to clipboard. `/copy 2` copies the second-to-last. Press `w` in picker to write to file |
+| `/clear [name]` | Start a new conversation with empty context. Pass a name to label the conversation you're leaving in the `/resume` picker. Aliases: `/reset`, `/new` |
+| `/compact [instructions]` | Free up context by summarizing the conversation so far, optionally with focus instructions (e.g. `/compact keep architecture decisions`) |
+| `/context [all]` | Visualize context usage as a colored grid, with optimization suggestions and capacity warnings |
+| `/btw [question]` | Ask a side question about the session without adding it to the conversation |
+| `/rewind` | Rewind the conversation and/or code to a previous point, or summarize from a selected message. Aliases: `/checkpoint`, `/undo` |
+| `/resume [session]` | Resume a conversation by ID or name, or open the session picker. Alias: `/continue` |
+| `/rename [name]` | Rename the current session (shown on the prompt bar). Without a name, auto-generates one |
+| `/branch [name]` | Branch the conversation at this point and **switch into the branch**; the original is preserved and reachable with `/resume` |
+| `/fork [prompt]` | Copy the conversation into a **new background session** and keep working here. With a prompt, the copy starts on it immediately |
+| `/export [filename]` | Export the conversation as plain text. Without a filename, opens a dialog to copy or save |
+| `/copy [N]` | Copy the last (or Nth-latest) assistant response. With code blocks, opens a picker; press `w` to write to a file |
+| `/recap` | Generate a one-line summary of the current session |
 
 ## Model & Configuration
 
 | Command | Purpose |
 |---|---|
-| `/model [model]` | Switch the AI model mid-session. Use left/right arrows to also adjust effort level |
-| `/effort [low\|medium\|high\|xhigh\|max\|auto]` | Set the model effort/thinking level. `max` is prone to overthinking — use sparingly; `xhigh`/`max` apply to the current session only |
-| `/fast [on\|off]` | Toggle fast mode on or off |
-| `/config` | Open the settings interface (theme, model, output style, preferences). Alias: `/settings` |
-| `/theme` | Change the color theme, including colorblind-accessible (daltonized) and ANSI variants |
-| `/color [color\|default]` | Set the prompt bar color for the current session. Options: red, blue, green, yellow, purple, orange, pink, cyan |
-| `/output-style [style]` | Set response formatting style (Default, Explanatory, Learning, or custom). Use `/output-style:new` to create one |
+| `/model [model]` | Switch model and save it as your default. With no argument, opens a picker — press `s` on a row to switch for this session only; left/right arrows adjust effort |
+| `/effort [level\|auto\|status]` | Set effort: `low`, `medium`, `high`, `xhigh`, `max`, `ultracode`, or `auto`. `max` and `ultracode` are session-only; the other levels are saved when confirmed |
+| `/fast [on\|off]` | Toggle fast mode |
+| `/config [key=value ...]` | Open Settings (theme, model, **output style**, editor mode, …) or set a key directly, e.g. `/config theme=dark`. Alias: `/settings` |
+| `/theme` | Change the color theme (auto, light/dark, daltonized, ANSI, custom) |
+| `/color [color\|default]` | Set the prompt bar color: red, blue, green, yellow, purple, orange, pink, cyan |
+| `/statusline` | Configure the status line |
+| `/keybindings` | Open your keyboard shortcuts file |
+
+> Output style and Vim editing mode are set from `/config` (or the `outputStyle` setting).
 
 ## Agentic Workflows (Bundled Skills)
 
-These use the same skill mechanism you can write yourself — a prompt handed to Claude, which Claude can also invoke automatically.
-
 | Command | Purpose |
 |---|---|
-| `/batch <instruction>` | **[Skill]** Orchestrate large-scale changes across a codebase in parallel. Decomposes into 5–30 independent units, spawns one background agent per unit in isolated git worktrees, each opens a PR |
-| `/simplify [focus]` | **[Skill]** Review recently changed files for code reuse, quality, and efficiency by spawning review agents in parallel, then applies fixes |
-| `/debug [description]` | **[Skill]** Enable debug logging for the session and troubleshoot by reading the session debug log. Optionally describe the issue to focus analysis |
-| `/loop [interval] [prompt]` | **[Skill]** Run a prompt repeatedly while the session stays open. Claude self-paces if no interval is given |
-| `/claude-api` | **[Skill]** Load Claude API reference material for your project's language. Also auto-activates when your code imports the Anthropic SDK |
-| `/code-review [level]` / `/review` (alias) / `ultrareview` | Review the current diff or a PR for correctness/quality issues. `ultra` level runs a cloud-hosted multi-agent review (`claude ultrareview [target]` from the shell). **Not present in the original PDF at all.** `/code-review` and its `/review` alias are confirmed in official docs; the `ultra` level and `ultrareview` subcommand are corroborated by several independent third-party write-ups but not spelled out explicitly in the official commands reference — treat as real-but-lightly-documented. |
+| `/batch <instruction>` | **[Skill]** Research the codebase, split the change into 5–30 independent units, present a plan, then run one background subagent per unit in its own git worktree; each opens a PR. Requires a git repo |
+| `/simplify [target]` | **[Skill]** Review changed code for cleanup and apply fixes. **Four** review agents run in parallel (reuse, simplification, efficiency, abstraction level). Doesn't look for bugs — use `/code-review` for that |
+| `/debug [description]` | **[Skill]** Turn on debug logging for the session and troubleshoot from the debug log |
+| `/loop [interval] [prompt]` | **[Skill]** Run a prompt repeatedly while the session is open; Claude self-paces without an interval. Alias: `/proactive` |
+| `/goal [condition\|clear]` | Keep Claude working across turns until a condition is met |
+| `/subtask <task>` | Spawn a forked background subagent that inherits the conversation and reports back here |
+| `/background [prompt]` | Detach the current session to run as a background agent. Alias: `/bg` |
+| `/claude-api [subcommand]` | **[Skill]** Load Claude API / Managed Agents reference for your project's language; auto-activates when code imports the Anthropic SDK |
 
 ## Permissions & Tools
 
 | Command | Purpose |
 |---|---|
-| `/permissions` | Manage allow/ask/deny rules for tool permissions interactively. Alias: `/allowed-tools` |
-| `/hooks` | View and configure hook rules for tool events |
-| `/mcp` | Manage MCP server connections and OAuth authentication |
-| `/add-dir <path>` | Add a working directory for file access during the current session |
-| `/sandbox` | Toggle sandbox mode (available on supported platforms only) |
+| `/permissions` | Manage allow/ask/deny rules and working directories. Alias: `/allowed-tools` |
+| `/fewer-permission-prompts` | **[Skill]** Scan transcripts for common read-only calls and add an allowlist to project settings |
+| `/hooks` | **View** hook configurations (read-only — edit settings files to change hooks) |
+| `/mcp [reconnect <server>\|enable\|disable ...]` | Manage MCP server connections and OAuth |
+| `/add-dir <path>` | Add a working directory for the session |
+| `/cd <path>` | Move the session to a new working directory, keeping the conversation |
+| `/sandbox` | Toggle sandbox mode (supported platforms only) |
 
 ## Project Initialization & Memory
 
 | Command | Purpose |
 |---|---|
-| `/init` | Initialize the project with a `CLAUDE.md` guide |
-| `/memory` | Edit `CLAUDE.md` memory files, enable/disable auto-memory, and view auto-memory entries |
-| `/skills` | List all available skills |
-| `/agents` | Manage subagent configurations — view, create, and edit subagents |
+| `/init` | Create a starter `CLAUDE.md`. Set `CLAUDE_CODE_NEW_INIT=1` for an interactive flow that also covers skills, hooks, and memory files |
+| `/memory` | Edit `CLAUDE.md` files, toggle auto memory, view auto-memory entries |
+| `/skills` | List available skills; filter, sort by token cost, toggle visibility |
+| `/reload-skills` | Re-scan skill and command directories without restarting |
+| `/agents` | Prints a reminder to ask Claude to create or manage subagents, or to edit `.claude/agents/` / `~/.claude/agents/` directly |
 
 ## Git, Code Review & CI
 
 | Command | Purpose |
 |---|---|
-| `/diff` | Open an interactive diff viewer for uncommitted changes and per-turn diffs |
-| `/security-review` | Analyze pending changes on the current branch for security vulnerabilities |
-| `/autofix-pr [prompt]` | Spawn a web session that watches the current branch's PR and pushes fixes when CI fails or reviewers leave comments. Requires `gh` CLI |
-| `/install-github-app` | Set up the Claude GitHub Actions app for automated PR reviews. **Spelling corrected** — the original PDF and first-pass edit had it as `/install-githubapp` (no hyphen), which is wrong |
+| `/diff` | Review working-tree changes, including Claude's edits |
+| `/code-review [low…max\|ultra] [--fix] [--comment] [target]` | **[Skill]** Review the current diff, a PR, branch, or path for correctness bugs and cleanups. `--fix` applies findings, `--comment` posts to the PR, `ultra` runs a deep multi-agent cloud review. Alias: `/review` |
+| `/ultrareview [PR or branch]` | Alias for `/code-review ultra` (cloud multi-agent review). Also available from the shell as `claude ultrareview [target]` |
+| `/security-review` | Review **the diff between your current branch and origin's default branch** for vulnerabilities. Needs an `origin` remote; takes no file/folder argument |
+| `/autofix-pr [prompt]` | Spawn a cloud session that watches the current branch's PR and pushes fixes for CI failures and review comments. Uses `gh` |
+| `/install-github-app` | Install the Claude GitHub App for a github.com repo, optionally with Actions workflows |
 
 ## IDE & Interface
 
 | Command | Purpose |
 |---|---|
-| `/ide` | Manage IDE integrations and show status |
-| `/desktop` | Continue the current session in the Claude Code Desktop app. **No confirmed alias** — `/app` is not listed in official docs |
-| `/terminalsetup` | Configure terminal keybindings for VS Code, Alacritty, Warp |
-| `/keybindings` | Open or create your keybindings configuration file |
+| `/ide` | Manage IDE integrations |
+| `/desktop` | Continue the session in the Claude Code Desktop app (macOS or x64 Windows). Alias: `/app` |
+| `/terminal-setup` | Install a Shift+Enter newline keybinding (VS Code, Cursor, Alacritty, Zed; Apple Terminal/iTerm2 variants) |
+| `/focus` | Toggle the focus view |
+| `/chrome` | Configure Claude in Chrome |
 
-## Account & Billing
+## Account & Usage
 
 | Command | Purpose |
 |---|---|
-| `/login` / `/logout` | Sign in/out of your Anthropic account |
-| `/cost` | Show token usage and cost statistics |
-| `/usage` | Show plan usage limits and rate limit status |
-| `/upgrade` | Open the upgrade page to switch to a higher plan tier |
-
-> Commands below this point (`/extra-usage`, `/privacy-settings`, `/passes`, `/insights`, `/stats`, `/powerup`, `/team-onboarding`, `/voice`, `/ultraplan`, `/mobile`) could not be confirmed against `claude --help` or other primary sources during this review. They are plausible but **unverified** — treat them as unconfirmed until checked against live product docs or `/help` inside a session.
+| `/login` / `/logout` | Sign in / out of your Anthropic account |
+| `/usage` | Session cost, plan usage limits, and activity stats. Aliases: `/cost`, `/stats` (opens on the Stats tab) |
+| `/usage-credits` | Configure usage credits (or request them from your admin) |
+| `/rate-limit-options` | Options for continuing when a usage limit blocks a request |
+| `/upgrade` | Open the plan upgrade page |
+| `/privacy-settings` | View/update privacy settings (Pro and Max) |
+| `/passes` | Share a free week of Claude Code (only if eligible) |
+| `/insights` | Generate an HTML report analyzing your recent sessions |
+| `/team-onboarding` | Generate a team onboarding guide from your last 30 days of usage |
 
 ## Cloud, Remote & Teleport
 
 | Command | Purpose |
 |---|---|
-| `/schedule [description]` | Create, update, list, or run Cloud scheduled tasks conversationally |
-| `/remote-control` | Make this session available for remote control from claude.ai. **No confirmed alias** — `/rc` is not listed in official docs. Corresponds to the real CLI flag `--remote-control [name]` |
-| `/teleport` | Pull a Claude Code on the web session into your terminal. **No confirmed alias** — `/tp` is not listed in official docs. Corresponds to the real CLI flag `--teleport [session]` |
+| `/schedule [description]` | Create, update, list, or run cloud **routines**. Alias: `/routines` |
+| `/remote-control` | Make this session controllable from claude.ai. Alias: `/rc` |
+| `/teleport` | Pull a cloud session into this terminal. Alias: `/tp` |
+| `/remote-env` | Choose the default cloud environment for cloud sessions started from the CLI |
+| `/web-setup` | Connect GitHub for cloud sessions using your local `gh` credentials |
 
 ## Utility & Information
 
 | Command | Purpose |
 |---|---|
-| `/help` | Show help and all available commands |
-| `/doctor` | Diagnose and verify your Claude Code installation and settings |
-| `/status` | Open Settings → Status tab (version, model, account, connectivity) |
-| `/release-notes` | View the changelog in an interactive version picker |
-| `/feedback [report]` | Submit feedback to Anthropic. **Note:** `/bug` is a separate command whose alias is actually `/share`, not `/feedback` — correct this from the original PDF |
-| `/plan [description]` | Enter plan mode. Pass a description to begin immediately |
-| `/tasks` | List and manage background tasks. **No confirmed alias** — `/bashes` is not listed in official docs |
-| `/exit` | Exit the CLI. Alias: `/quit` |
+| `/help` | Show help and available commands |
+| `/doctor` | **[Skill]** Setup checkup that diagnoses and can fix issues (installs, PATH, settings, unused skills/MCP/plugins, slow hooks). From the shell, `claude doctor` prints read-only diagnostics |
+| `/status` | Settings → Status tab (version, model, account, connectivity) |
+| `/release-notes` | Interactive changelog |
+| `/feedback [report]` | Send product feedback (same dialog as `/bug`) |
+| `/bug [report]` | Report a bug or share your conversation. Alias: `/share` |
+| `/plan [description]` | Enter plan mode; with a description, start on it immediately |
+| `/tasks` | View and manage background work (shells, subagents). Alias: `/bashes` |
+| `/powerup` | Interactive feature lessons |
+| `/voice [hold\|tap\|off]` | Voice dictation (requires a Claude.ai account) |
+| `/mobile` | QR code for the Claude mobile app. Aliases: `/ios`, `/android` |
+| `/exit` | Exit (detaches when attached to a background session). Alias: `/quit` |
 
 ## Setup & Platform-Specific
 
 | Command | Purpose |
 |---|---|
-| `/plugin` | Manage Claude Code plugins |
-| `/reload-plugins` | Reload all active plugins to apply changes without restarting |
-| `/chrome` | Configure Claude in Chrome extension settings |
+| `/plugin [subcommand]` | Manage plugins (`list`, `install`, `enable`, `disable`, `validate`, `marketplace …`) |
+| `/reload-plugins [--force]` | Reload active plugins without restarting |
+| `/install-slack-app` | Install the Claude Slack app (OAuth in browser) |
+| `/setup-bedrock` / `/setup-vertex` | Provider setup wizards (hidden until `CLAUDE_CODE_USE_BEDROCK=1` / `CLAUDE_CODE_USE_VERTEX=1`) |
 
-## Model Aliases (for `/model` command) — CORRECTED
+**MCP prompts** appear dynamically as `/mcp__<server>__<prompt>`.
 
-| Alias | Resolves To | Best For |
+## Model Aliases (for `/model` and `--model`)
+
+| Alias | Resolves To (Anthropic API) | Best For |
 |---|---|---|
-| `default` | Clears override, uses plan default | Resetting to recommended |
-| `best` | Latest Opus (**Opus 5**) | Most capable available |
-| `sonnet` | **Sonnet 5** | Daily coding (default) |
-| `opus` | **Opus 5** | Complex reasoning |
-| `haiku` | Haiku 4.5 | Fast, simple tasks (unchanged — no Haiku 5 has shipped) |
-| `fable` | **Fable 5.1** | *(missing from original PDF entirely)* |
-| `opusplan` | Opus 5 (plan) → Sonnet 5 (execute) | Best of both worlds |
+| `default` | Clears any override; uses your account's default (see below) | Resetting |
+| `best` | **Fable** where available to you, otherwise the same as `opus` | Most capable available |
+| `fable` | Fable 5.1 | Hardest, longest-running tasks |
+| `opus` | Opus 5 | Complex reasoning |
+| `sonnet` | Sonnet 5 | Daily coding |
+| `haiku` | Haiku 4.5 | Fast, simple tasks |
+| `sonnet[1m]` / `opus[1m]` | 1M-context variants | `sonnet[1m]` has no effect on the Anthropic API because Sonnet 5 is always 1M |
+| `opusplan` | Opus in plan mode → Sonnet for execution | Plan deeply, execute fast |
 
-Full pinned model IDs: `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5-20251001`, `claude-fable-5-1`.
+**Account default model:** Max, Team Premium, Enterprise, and API → Opus 5. Pro and Team Standard → Sonnet 5.
 
-**Correction (second pass):** The original edit of this doc added `sonnet[1m]` / `opus[1m]` as if they were separate aliases for "now-native" 1M context. That's hallucinated — there is no `[1m]` suffix in the real `/model` alias list. 1M-token context is a property of the current models, not a distinct alias to select.
+Aliases resolve differently on other providers (e.g. `sonnet` is Sonnet 4.6 on Claude Platform on AWS and Sonnet 4.5 on Bedrock/Vertex/Foundry). Pin with full IDs: `claude-fable-5-1`, `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5-20251001`.
 
-## Effort Levels (for `/effort` command) — CORRECTED
+## Effort Levels (for `/effort` and `--effort`)
 
-| Level | Behaviour | Persists Across Sessions |
+| Level | Behaviour | Persists |
 |---|---|---|
-| `low` | Faster, less thorough | Yes |
-| `medium` | Lower-effort default on some plans | Yes |
-| `high` | Deep reasoning; the documented default effort for current models (Sonnet 5, Opus 5, Fable 5.1) — **not confirmed** as specifically "Pro/Max = medium, API/Team/Enterprise = high" as an earlier pass of this doc claimed; that plan-based split could not be verified against official docs and may be outdated | Yes |
-| `xhigh` | *(missing from original PDF)* Deep reasoning, higher token usage — best for most coding/agentic work on current-gen models | **Yes** (corrected — an earlier pass of this doc incorrectly grouped `xhigh` with `max` as session-only) |
-| `max` | Maximum, prone to overthinking | No (current session only) |
-| `auto` | Reset to model default | — |
+| `low` | Short, latency-sensitive tasks | Yes, when confirmed with `Enter` (press `s` for this session only) |
+| `medium` | Cost-sensitive work, some intelligence trade-off | Same as above |
+| `high` | **Default on every effort-capable model** except Opus 4.7 | Same as above |
+| `xhigh` | Deeper reasoning at higher token spend (default on Opus 4.7) | Same as above |
+| `max` | Deepest; prone to overthinking — test before adopting | **No** — session only (unless set via `CLAUDE_CODE_EFFORT_LEVEL`) |
+| `ultracode` | Claude Code setting: `xhigh` plus dynamic workflows for substantive tasks | Session only via `/effort` |
+| `auto` | Reset to the model default | — |
 
-Haiku 4.5 does not support effort levels.
+`xhigh` is supported on Fable 5.1/5, Opus 5, Sonnet 5, Opus 4.8 and 4.7; Opus 4.6 and Sonnet 4.6 top out at `high`/`max`. Haiku 4.5 does not support effort.
 
-## Thinking Keywords (Prompt-Level)
-
-These only work in Claude Code's terminal — not in claude.ai chat or the API.
+## Thinking Keyword
 
 | Keyword | Effect |
 |---|---|
-| `ultrathink` | Triggers high effort for that one turn, then reverts to session default. **Unverified** — appears repeatedly in third-party blog posts, but could not be confirmed against official code.claude.com docs in this pass. Demo it live and confirm behavior in-session before presenting it as documented fact. |
+| `ultrathink` | Documented. Claude Code adds an in-context instruction to reason more deeply **on that turn**. It does **not** change the effort level sent to the API. Phrases like "think" or "think hard" are passed through as ordinary text |
 
 ## Key Keyboard Shortcuts
 
-**Unverified (second pass).** The official keyboard-shortcuts doc page returned a 404 during this review, and a separate fetch of `desktop.md` showed at least one conflicting binding (`Ctrl+O` listed there as "cycle view modes," not "toggle verbose mode"). Treat this table as unconfirmed until checked live with `/help` or the current docs site.
-
 | Shortcut | Action |
 |---|---|
-| `Shift+Tab` | Cycle through permission modes |
-| `Ctrl+O` | Toggle verbose mode |
-| `Ctrl+G` | Open current plan in your default text editor |
-| `Ctrl+T` | Toggle background task list display |
-| `Option+T` / `Alt+T` | Enable/disable extended thinking |
-| `Esc Esc` (double tap) | Time machine — browse all prompts from current session |
-| `↑` arrow | Navigate back through past prompts |
+| `Shift+Tab` | Cycle permission modes: `default` (Manual) → `acceptEdits` → `plan` → (when available) `bypassPermissions` → `auto` |
+| `Ctrl+O` | Toggle the transcript viewer (detailed tool usage) |
+| `Ctrl+G` | Open your **prompt** in your default text editor |
+| `Ctrl+T` | Show/hide Claude's task checklist (not background tasks — use `/tasks`) |
+| `Ctrl+B` | Send running Bash commands/agents to the background |
+| `Ctrl+R` | Reverse-search prompt history |
+| `Option+P` / `Alt+P` | Switch model without clearing your prompt |
+| `Option+T` / `Alt+T` | Toggle extended thinking (no effect on Fable) |
+| `Option+O` / `Alt+O` | Toggle fast mode |
+| `Esc` | Interrupt Claude / close a dialog |
+| `Esc` `Esc` | With text in the prompt: clear it (saved to history). With an empty prompt: open the rewind menu |
+| `↑` / `↓` | Move within a multi-line prompt, then navigate history |
 
-## CLI Flags (at Startup) — CORRECTED
-
-Verified directly against `claude --help` output (Sep 2026):
+## CLI Flags (at Startup)
 
 ```
-claude --model <alias|name>            # Set model for this session (e.g. 'fable', 'opus', 'sonnet', or full name like 'claude-sonnet-5')
-claude --name "session-name"           # Start with a named session
-claude -n "session-name"               # Short form
-claude --continue                      # Resume last session
-claude -c                              # Short form
-claude --resume [session]              # Open session picker or resume by name/ID
-claude -r                              # Short form
-claude --from-pr 142                   # Resume session linked to a PR
-claude --teleport [session-id]         # Pull a cloud session to terminal
-claude --cloud "task description"      # Create a cloud session with a description (preferred flag)
-claude --remote "task description"     # Deprecated alias for --cloud — still works, but --cloud is current (CORRECTED — an earlier pass of this doc claimed --remote "does not exist"; it exists but is deprecated, not absent)
-claude --remote-control [name]         # Enable Remote Control on an interactive session (also missing from the original PDF)
-claude --permission-mode plan          # Start in Plan Mode
-claude --worktree [name]               # Start in an isolated git worktree
-claude -d, --debug [filter]            # Start with debug logging enabled, optionally filtered (e.g. "api,hooks")
-claude -p "prompt"                     # Headless / non-interactive mode
+claude --model <alias|name>            # Model for this session (e.g. fable, opus, sonnet, claude-sonnet-5)
+claude --effort <level>                # Effort for this session
+claude -n, --name "session-name"       # Name the session
+claude -c, --continue                  # Continue the most recent session in this directory
+claude -r, --resume [session]          # Picker, or resume by name/ID
+claude --resume <id> --fork-session    # Resume into a new session ID
+claude --from-pr 142                   # Picker filtered to sessions linked to a PR
+claude --teleport                      # Resume a cloud session locally
+claude --cloud "task description"      # Create a cloud session (--remote is a deprecated alias)
+claude --remote-control [name]         # Interactive session with Remote Control (alias --rc)
+claude --permission-mode plan          # Start in plan mode
+claude -w, --worktree [name]           # Start in an isolated git worktree
+claude --debug                         # Debug logging; filter with the = form: --debug=mcp,hooks
+claude -p "prompt"                     # Non-interactive (print) mode
 ```
 
-Also present in the real CLI but absent from the original PDF entirely: `claude ultrareview [options] [target]` — runs a cloud-hosted multi-agent code review of the current branch or a PR, `claude agents`, `claude attach <id>`, `claude auth`, and several background-session subcommands (`logs`, `rm`, `stop|kill`, `respawn`).
+Shell subcommands: `claude update`, `claude doctor`, `claude auth login|logout|status`, `claude mcp …`, `claude plugin …`, `claude agents`, `claude attach <id>`, `claude logs <id>`, `claude stop <id>`, `claude respawn <id>`, `claude rm <id>`, `claude ultrareview [target]`.
 
 ## Where Sessions Are Stored
 
-`~/.claude/projects/<encoded-project-path>/*.jsonl`
-
-Each `.jsonl` file is a complete conversation record. Sessions never auto-delete. *(Not independently re-verified this pass — reproduced from original PDF as plausible/consistent with known behavior.)*
-
----
-
-## What Changed From the Original PDF
-
-The source PDF (`claude-code-slash-commands.pdf`, dated April 2026) had gone stale/inaccurate in a few specific ways by the time of this review (September 2026). This document has now gone through **two** correction passes — the second pass fact-checked the first pass's own corrections against official docs (code.claude.com/docs) and caught several new hallucinations the first pass introduced. Both rounds are folded in below.
-
-**From PDF → first-pass correction:**
-
-1. **Model Aliases table**: `sonnet` was listed as Sonnet 4.6, `opus` as Opus 4.6 — both are now **Sonnet 5** and **Opus 5**. The `fable` alias (Fable 5.1) was missing entirely.
-2. **Effort Levels table**: missing the `xhigh` level, and incorrectly restricted `max` to "Opus 4.6 only" — `xhigh`/`max` now apply across current-generation models.
-3. **Missing entirely from the PDF**: the `ultrareview` subcommand/`/code-review ultra` flow, and several background-session management commands (`claude agents`, `attach`, `logs`, `rm`, `stop`/`kill`, `respawn`).
-
-**Second-pass corrections to the first pass itself (verified against official docs — see the inline notes above for each):**
-
-4. **`--remote` flag**: the first pass claimed it "does not exist." It actually exists as a **deprecated alias for `--cloud`** — deprecated, not absent.
-5. **Hallucinated model aliases**: the first pass invented `sonnet[1m]` / `opus[1m]` as if 1M context were a separate alias. There is no `[1m]` suffix — 1M context is a property of the current models, selected the normal way (`sonnet`, `opus`, etc).
-6. **Hallucinated command aliases**: the first pass asserted several slash-command aliases that are not confirmed in official docs and should be treated as wrong: `/rewind`→`/checkpoint`, `/resume`→`/continue`, `/branch`→`/fork` (was real in old versions v2.1.77–v2.1.161, not current), `/desktop`→`/app`, `/remote-control`→`/rc`, `/teleport`→`/tp`, `/tasks`→`/bashes`, and `/feedback`→`/bug` (actually `/bug`'s alias is `/share`, unrelated to `/feedback`).
-7. **Wrong command spelling**: `/install-githubapp` should be `/install-github-app` (hyphenated).
-8. **Effort-level persistence**: the first pass grouped `xhigh` with `max` as "session only." `xhigh` actually persists across sessions like the other levels; only `max` is session-only.
-9. **Effort-level plan defaults**: the first pass's specific claim ("medium = Pro/Max default, high = API/Team/Enterprise default") could not be verified against official docs in the second pass and may be stale — flagged as unverified rather than restated as fact.
-10. **`ultrathink` keyword** and the **keyboard shortcuts table**: both are widely repeated in third-party sources but could not be confirmed against the current official docs site (one relevant page 404'd, another showed a conflicting binding). Flagged as unverified rather than presented as confirmed.
-
-**Still unverified, not confirmed either way**: `/btw`, `/copy`, `/color`, `/context`, `/keybindings`, `/chrome` are now confirmed to exist; `/extra-usage`, `/privacy-settings`, `/passes`, `/insights`, `/stats`, `/powerup`, `/team-onboarding`, `/voice`, `/ultraplan`, `/mobile` remain unconfirmed either way.
-
-**Confirmed accurate and unchanged**: `/clear` (aliases `/reset`, `/new`), `/compact`, `/model`, `/config` (alias `/settings`), `/permissions` (alias `/allowed-tools`), `/exit` (alias `/quit`), `/code-review` (alias `/review`), `/theme`, `/hooks`, `/mcp`, `/add-dir`, `/init`, `/memory`, `/agents`, `/cost`, `/doctor`, `/help`, `/status`, `/export`, `/plan`, `/output-style`, `/ide`, plus the CLI flags `--model`, `-n/--name`, `-c/--continue`, `-r/--resume`, `--from-pr`, `--teleport`, `--cloud`, `--permission-mode`, `-w/--worktree`, `-d/--debug`, `-p/--print`.
-
-**Caveat:** A full in-session `/help` listing was not available in either review pass (headless/agent checks only covered docs pages and web search, not a live interactive session). To fully close out the remaining unverified items — keyboard shortcuts, `ultrathink`, and the "still unconfirmed" command list — run `/help` inside an interactive Claude Code session and diff it against this table.
+`~/.claude/projects/<encoded-project-path>/<session-id>.jsonl` — one file per conversation. Transcripts are **deleted automatically after 30 days** by default; change this with `cleanupPeriodDays` in `settings.json`, or `/export` anything you need to keep.

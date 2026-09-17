@@ -1,111 +1,117 @@
-# Claude Code — Built-in Tools Reference (Updated)
+# Claude Code — Built-in Tools Reference
 
-> **Last updated:** September 2026
-> **Change summary:** Several tools described in the original PDF don't exist in the current build (`LSP`, `TaskCreate`/`TaskGet`/`TaskList`/`TaskUpdate`, `TeamCreate`/`TeamDelete`, `TodoWrite`); several real tools were missing entirely; and a few gating/behavior descriptions were stale. See "What Changed" at the bottom.
+> **Source:** Rebuilt from the official tools reference ([code.claude.com/docs/en/tools-reference](https://code.claude.com/docs/en/tools-reference)).
+> **Last verified:** September 2026
 
-Claude Code ships with a set of built-in tools that it uses autonomously to understand and modify codebases. Tool names listed here are the exact strings used in permission rules, subagent tool lists, and hook matchers. Some tools are **deferred** — their full schema loads on demand via `ToolSearch` rather than being defined upfront.
+Claude Code ships with built-in tools it uses to understand and modify your codebase. The tool names below are the exact strings used in **permission rules**, **subagent `tools` lists**, and **hook matchers**. The tools present in any one session vary by platform, model, plan, and configuration — a tool missing from your session is not proof it doesn't exist.
 
 ## Permission Key
 
+"Permission required" means the tool prompts in **Manual** (`default`) mode. On Pro, Max, and Team plans, sessions start in **auto mode**, where a classifier decides most of these prompts instead of you.
+
 | Symbol | Meaning |
 |---|---|
-| ✅ | No explicit permission required |
-| 🔐 | Requires user permission / approval |
+| ✅ | No permission prompt |
+| 🔐 | Prompts for permission in Manual mode |
 
 ## Tools Table
 
 | Tool | Permission | What It Does |
 |---|---|---|
-| `Agent` | ✅ | Spawns a subagent — in-process, forked with full context, or a fresh general-purpose/specialized agent — to handle a complex or isolated task autonomously |
-| `AskUserQuestion` | ✅ | Presents multiple-choice questions to the user to gather requirements or resolve ambiguity before proceeding |
-| `Artifact` | ✅ | Publishes, reads, updates, and manages Artifacts — hosted HTML/Markdown pages shown to the user, including runtime capabilities, shared database, assets, comments, and watches |
-| `Bash` | 🔐 | Executes shell commands in a persistent bash session; used for running tests, git commands, package managers, build tools, and general terminal operations |
-| `PowerShell` | 🔐 | Executes PowerShell commands; on Windows this is a **standard, always-available** tool (alongside Bash), not an opt-in experimental feature |
-| `CronCreate` | ✅ (deferred) | Creates a scheduled cloud agent (routine) that fires on a cron schedule — **persists beyond the current session**, not cleared on exit |
-| `CronDelete` | ✅ (deferred) | Deletes a scheduled cron agent |
-| `CronList` | ✅ (deferred) | Lists scheduled cron agents |
-| `Edit` | 🔐 | Makes targeted, surgical edits to a specific file using exact string replacement — preferred over full rewrites for small changes |
-| `EnterPlanMode` | ✅ (deferred) | Switches Claude into plan mode so it designs an approach and gets approval before writing any code |
-| `ExitPlanMode` | 🔐 (deferred) | Presents the plan to the user for approval and exits plan mode to begin execution |
-| `EnterWorktree` | ✅ (deferred) | Creates an isolated git worktree and switches into it — useful for parallel Claude Code sessions on separate branches |
-| `ExitWorktree` | ✅ (deferred) | Exits the current worktree session and returns Claude to the original working directory |
-| `Glob` | ✅ | Finds files by name/path pattern matching (e.g., `**/*.ts`); results sorted by modification time; does **not** respect `.gitignore` by default |
-| `Grep` | ✅ | Searches file *contents* for text patterns using ripgrep syntax; respects `.gitignore` by default; can return file paths only, matching lines, or context around matches |
-| `ListMcpResourcesTool` | ✅ (deferred) | Lists resources (prompts, data, schemas) exposed by connected MCP servers |
-| `ReadMcpResourceTool` | ✅ (deferred) | Reads a specific MCP resource by its URI |
-| `ReadMcpResourceDirTool` | ✅ (deferred) | Reads an MCP resource directory listing |
-| `NotebookEdit` | 🔐 (deferred) | Modifies cells in Jupyter (`.ipynb`) notebooks — add, edit, delete, or reorder cells |
-| `Read` | ✅ | Reads the contents of one or more files (including images and PDFs); core tool for understanding code before making changes |
-| `Write` | 🔐 | Creates a new file or completely overwrites an existing one — use `Edit` for targeted changes |
-| `ListAgents` | ✅ (deferred) | Lists agents you can message — subagents you spawned, team teammates, other local sessions, and cloud sessions — as addresses for `SendMessage` |
-| `SendMessage` | ✅ (deferred) | Sends a message to a listed agent (subagent, teammate, or other session), or resumes a spawned agent by name/ID — standard tool, **no experimental flag required** |
-| `Skill` | varies | Invokes a packaged skill — reusable instructions for a specific workflow; some skills run inline, others hand off to a subagent |
-| `TaskOutput` | ✅ (deferred) | Retrieves output/status from a background task started with `run_in_background` — **still active, not deprecated** |
-| `TaskStop` | ✅ (deferred) | Stops a running background task |
-| `Monitor` | ✅ (deferred) | Streams live events/notifications from a background process |
-| `ToolSearch` | ✅ | Fetches full schemas for deferred tools on demand — avoids stuffing every tool definition into context upfront |
-| `ReportFindings` | ✅ | Reports structured, typed code-review findings for host-UI rendering |
-| `ScheduleWakeup` | ✅ | Schedules the next self-paced resumption of a running `/loop` |
-| `SendFeedback` | ✅ | Drafts (locally queued, not auto-sent) feedback about Claude Code product or model behavior |
-| `DesignSync` | ✅ (deferred) | Syncs design-related state (e.g., Claude Design canvas) |
-| `PushNotification` | ✅ (deferred) | Sends a push notification |
-| `RemoteTrigger` | ✅ (deferred) | Triggers a remote/cloud action |
-| `EndConversation` | ✅ (deferred) | Ends the current conversation session — reserved for sustained abuse or explicit user request |
-| `WebFetch` | 🔐 (deferred) | Fetches content from a specified URL; converts to markdown; does **not** auto-follow cross-host redirects (fetches the redirect target in a second call) |
-| `WebSearch` | 🔐 (deferred) | Runs a web search via Anthropic's search backend and returns result titles/URLs |
+| `Agent` | ✅ | Spawns a subagent with its own context window. With agent teams enabled, a call that carries a `name` can launch a teammate |
+| `Artifact` | 🔐 | Publishes an HTML or Markdown file as a private, interactive page on claude.ai |
+| `AskUserQuestion` | ✅ | Asks multiple-choice questions to gather requirements or resolve ambiguity |
+| `Bash` | 🔐 | Executes shell commands (see behaviour below) |
+| `CronCreate` | ✅ | Schedules a recurring or one-shot prompt **within the current session**. Session-scoped; restored on `--resume`/`--continue` if unexpired |
+| `CronDelete` | ✅ | Cancels a session scheduled task by ID |
+| `CronList` | ✅ | Lists the session's scheduled tasks |
+| `Edit` | 🔐 | Makes targeted edits to a file (exact string replacement) |
+| `EndConversation` | ✅ | Ends the session — only for sustained abusive input or when you ask to see it demonstrated |
+| `EnterPlanMode` | ✅ | Switches to plan mode to design an approach before coding |
+| `EnterWorktree` | 🔐 | Creates an isolated git worktree (or enters an existing one) and switches into it |
+| `ExitPlanMode` | 🔐 | Presents the plan for approval and exits plan mode |
+| `ExitWorktree` | ✅ | Leaves the worktree and returns to the original directory |
+| `Glob` | ✅ | Finds files by name pattern. **In the default tool set on Windows only** (see below) |
+| `Grep` | ✅ | Searches file contents (ripgrep). **In the default tool set on Windows only** (see below) |
+| `ListAgents` | ✅ | Lists agents Claude can message with `SendMessage`: subagents, teammates, and your other sessions |
+| `ListMcpResourcesTool` | ✅ | Lists resources exposed by connected MCP servers |
+| `LSP` | ✅ | Code intelligence from a language server: definitions, references, type info, symbols; reports type errors after edits. Needs a code-intelligence plugin for the language |
+| `Monitor` | 🔐 | Runs a command in the background and feeds each output line back to Claude (or listens on a WebSocket) |
+| `NotebookEdit` | 🔐 | Modifies Jupyter notebook cells |
+| `PowerShell` | 🔐 | Executes PowerShell commands natively (availability below) |
+| `PushNotification` | ✅ | Sends a desktop notification (and a phone push when Remote Control is connected) |
+| `Read` | ✅ | Reads files, including images and PDFs |
+| `ReadMcpResourceTool` | ✅ | Reads a specific MCP resource by URI |
+| `RemoteTrigger` | ✅ | Creates, updates, runs, and lists cloud **Routines** — the **persistent** scheduled agents behind `/schedule` |
+| `ReportFindings` | ✅ | Reports code-review findings as a structured list for the UI |
+| `ScheduleWakeup` | ✅ | Picks when the next iteration of a self-paced `/loop` runs |
+| `SendFeedback` | ✅ | Drafts a feedback report and queues it locally; nothing is sent until you choose to |
+| `SendMessage` | ✅ | Messages a teammate, resumes a subagent by ID or name, or messages another of your sessions |
+| `SendUserFile` | ✅ | Sends a generated file (report, screenshot, build output) to you |
+| `ShareOnboardingGuide` | 🔐 | Uploads `ONBOARDING.md` from `/team-onboarding` and returns a share link |
+| `Skill` | 🔐 | Runs a skill within the main conversation |
+| `SubagentHandback` | ✅ | Delivers a subagent's final report (auto mode only) |
+| `TaskCreate` | ✅ | Creates a task in the task checklist ¹ |
+| `TaskGet` | ✅ | Gets full details of a task ¹ |
+| `TaskList` | ✅ | Lists tasks and their status ¹ |
+| `TaskUpdate` | ✅ | Updates task status, dependencies, or details; can delete tasks ¹ |
+| `TaskOutput` | ✅ | Retrieves output from a background task. **Deprecated** — prefer `Read` on the task's output file |
+| `TaskStop` | ✅ | Stops a background task, teammate, or named background agent |
+| `TodoWrite` | ✅ | Session checklist. **Disabled by default** in favour of the Task tools; re-enable with `CLAUDE_CODE_ENABLE_TASKS=0` where task tools are available |
+| `ToolSearch` | ✅ | Loads deferred tools on demand when tool search is enabled |
+| `WaitForMcpServers` | ✅ | Waits for MCP servers still connecting in the background (tool-search sessions) |
+| `WebFetch` | 🔐 | Fetches a URL and extracts content with a small model |
+| `WebSearch` | 🔐 | Runs a web search |
+| `Workflow` | 🔐 | Runs a dynamic workflow script that orchestrates many subagents |
+| `Write` | 🔐 | Creates or overwrites a file |
 
-**Not real tools** (described in the original PDF but absent from the current tool surface — see "What Changed"): `LSP`, `TaskCreate`, `TaskGet`, `TaskList`, `TaskUpdate`, `TeamCreate`, `TeamDelete`, `TodoWrite`.
+¹ **Task tool availability:** `TaskCreate`, `TaskGet`, `TaskList`, `TaskUpdate` (and `TodoWrite`) are provided by default **only** on Claude 3.x models, Opus 4–4.7, Sonnet 4–4.6, and Haiku 4.5. On newer models (Opus 5, Sonnet 5, Fable) Claude tracks multi-step work without them unless you opt in with `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, `--allowedTools TaskCreate`, or `--tools`. Agent-team task lists depend on these tools being present.
 
 ## Noteworthy Behaviors
 
 ### Bash
-- Working directory **persists** across commands within a session
-- Environment variables do **not** persist (re-export each command as needed)
-- Default timeout: **2 minutes** per command (Claude can request up to **10 min**)
-- Long-running processes (dev servers, watchers) can be run in the background with `run_in_background: true`, then tracked with `TaskOutput`/`TaskStop`/`Monitor`
+- Each command runs in a **separate process**.
+- A `cd` in the main session carries over to later commands **as long as it stays inside the project** (or an added directory); outside it, the directory resets and Claude sees `Shell cwd was reset to <dir>`. Subagents never carry over `cd`.
+- Environment variables **don't** persist between commands.
+- Default timeout **2 minutes** (`BASH_DEFAULT_TIMEOUT_MS`); Claude can request up to **10 minutes** (`BASH_MAX_TIMEOUT_MS`).
+- Output reaches Claude inline up to roughly **30,000 characters** (`BASH_MAX_OUTPUT_LENGTH`, max 150,000); longer output is saved to a file Claude can read.
+- Long-running processes can run in the background and be watched with `Monitor` or stopped with `TaskStop`.
+
+### PowerShell
+- **Windows without Git Bash:** enabled automatically (and there is no Bash tool).
+- **Windows with Git Bash:** on by default for claude.ai and Console accounts; set `CLAUDE_CODE_USE_POWERSHELL_TOOL=1` to enable on Bedrock/Vertex/Foundry, `0` to turn off.
+- **macOS, Linux, WSL:** opt-in.
+- Hooks that inspect shell commands should match `Bash|PowerShell`.
 
 ### Edit vs Write
-- Use `Edit` for targeted changes to existing files (exact string replacement)
-- Use `Write` when creating new files or when a full rewrite is appropriate
+- `Edit` for targeted changes to existing files; `Write` for new files or full rewrites.
 
 ### Glob vs Grep
-- `Glob` → finds files by *name/path pattern* (does not respect `.gitignore` by default)
-- `Grep` → finds files by *content pattern* (respects `.gitignore` by default)
+- **Windows:** both are in the default tool set.
+- **macOS, Linux, WSL:** both are left out by default and Claude uses `find`/`grep` through Bash. They come back if you name them in `--tools`/`--allowedTools`, if Bash is removed from the session, or in a subagent that lists them and omits Bash.
+- `Glob` results are sorted by modification time and **capped at 100 files**; it does **not** respect `.gitignore` by default.
+- `Grep` **respects** `.gitignore`.
 
 ### WebFetch
-- Redirects to a different host are **not** followed automatically — Claude fetches the redirect target in a second call
+- HTTP is upgraded to HTTPS; responses are cached for 15 minutes.
+- Output is **lossy by design** — a small model extracts what the prompt asks for.
+- Redirects to a **different host** aren't followed; Claude fetches the new URL in a second call.
 
-### Deferred tools
-- A growing share of tools (MCP resource tools, Cron*, plan/worktree mode, Web*, Task*, agent-messaging tools, and more) are **deferred**: only their name is known until `ToolSearch` loads the full schema. This keeps context usage down when many tools are configured, rather than stuffing every schema in upfront.
+### WebSearch
+- At most **200 searches per session**, shared across the main conversation and all subagents.
+
+### Deferred tools / tool search
+- Tool search is on by default: **MCP tools are deferred** and loaded on demand through `ToolSearch`, keeping their schemas out of context until needed. It is turned off when `ANTHROPIC_BASE_URL` points to a non-first-party host.
 
 ## Extending Claude Code Tools
 
 | Method | What It Does |
 |---|---|
-| **MCP Server** | Connect an external server to add fully custom tools |
-| **Skill** | Write a reusable prompt-based workflow; invoked via the `Skill` tool or `/<skill-name>` |
-| **Permissions** | Use `/permissions` or `settings.json` to allow/deny specific tools |
+| **MCP server** | Connect an external server to add custom tools |
+| **Skill** | Reusable prompt-based workflow, run through the existing `Skill` tool or `/<skill-name>` |
+| **Permissions** | Allow/ask/deny tools with `/permissions` or `settings.json` |
+| **Hooks** | Run your own checks before/after tool calls (`PreToolUse`, `PostToolUse`, …) |
 
 ## Check Available Tools in a Session
 
-```
-What tools do you have access to?
-```
-
-Ask Claude directly for a conversational summary. For exact MCP tool names, run `/mcp`.
-
----
-
-## What Changed From the Original PDF
-
-The source PDF (`claude-code-tools-reference.pdf`, last verified May 2026) had drifted from the real tool surface by September 2026:
-
-1. **`LSP` tool removed/never real** — not present anywhere in the current tool set (main or deferred). No built-in code-intelligence tool by this name exists.
-2. **Task/Team CRUD tools don't match reality** — `TaskCreate`, `TaskGet`, `TaskList`, `TaskUpdate`, `TeamCreate`, `TeamDelete`, and `TodoWrite` are all absent from the current tool set. Only `TaskOutput` and `TaskStop` are real, and `TaskOutput` is **not** deprecated as the PDF claimed — it's an active deferred tool, paired with `Monitor` for streaming background-task events.
-3. **Agent teams / `SendMessage` no longer experimental** — the PDF said this required `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` or `--agent-teams`. In the current build, `ListAgents` and `SendMessage` are standard deferred tools with no experimental-flag gating mentioned.
-4. **`PowerShell` is not an opt-in preview** — the PDF said it required `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`. On Windows sessions it now ships as a standard top-level tool alongside `Bash` (in fact the primary shell tool on Windows).
-5. **`CronCreate`/`CronDelete`/`CronList` description was wrong** — the PDF described session-scoped, exit-cleared tasks. These actually create/manage **persistent cloud-scheduled agent routines** that survive well beyond the current session.
-6. **Missing tools entirely** — `Artifact`, `ListAgents`, `ReportFindings`, `ScheduleWakeup`, `SendFeedback`, `DesignSync`, `Monitor`, `PushNotification`, `RemoteTrigger`, `EndConversation`, and `ReadMcpResourceDirTool` are all real, currently-available tools that the original reference never mentioned.
-7. **Confirmed accurate and unchanged**: `Agent`, `AskUserQuestion`, `Bash` (timeout/backgrounding behavior matches exactly), `Edit`, `EnterPlanMode`/`ExitPlanMode`, `EnterWorktree`/`ExitWorktree`, `Glob`/`Grep` (including the `.gitignore` split), `ListMcpResourcesTool`/`ReadMcpResourceTool`, `NotebookEdit`, `Read`, `Skill`, `ToolSearch`, `Write`, and the `WebFetch` cross-host redirect behavior.
-
-**Caveat:** the exact deferred-tool roster can vary by session, plan, and which MCP servers/integrations are connected — treat the "deferred" tags above as representative of a typical session, and confirm your own session's live list with `/mcp` or by asking Claude directly.
+Ask Claude "What tools do you have access to?" for a summary. Run `/mcp` for exact MCP tool names.
