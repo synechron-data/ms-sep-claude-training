@@ -2,7 +2,7 @@
 name: deploy
 description: Deploy the backend and frontend to the staging environment
 disable-model-invocation: true
-allowed-tools: Bash(mvn:*), Bash(npm:*), Bash(git:*)
+allowed-tools: Bash(mvn:*), Bash(npm:*), Bash(git status:*), Bash(git diff:*), Bash(git tag:*), Bash(git push origin --tags:*)
 ---
 
 # Deployment Skill

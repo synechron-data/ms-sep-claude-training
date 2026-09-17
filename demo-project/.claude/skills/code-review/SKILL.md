@@ -3,7 +3,7 @@ name: code-review
 description: >
   Use this skill when the task involves reviewing, auditing or assessing
   code quality, security or test coverage in this Spring Boot / Angular codebase.
-  Triggers on phrases like "review this", "check this code", "audit the task module"SKILL.md
+  Triggers on phrases like "review this", "check this code", "audit the task module"
   or any request to evaluate the existing code.
 ---
 
