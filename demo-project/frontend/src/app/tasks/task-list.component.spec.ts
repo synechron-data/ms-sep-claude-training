@@ -17,6 +17,7 @@ describe('TaskListComponent', () => {
     createdAt: '2026-01-01T00:00:00Z',
     dueDate: '2026-01-15',
     overdue: false,
+    priority: 'MEDIUM',
   };
 
   beforeEach(async () => {

@@ -31,6 +31,7 @@ describe('TaskService', () => {
       createdAt: '2026-01-01T00:00:00Z',
       dueDate: '2026-02-01',
       overdue: false,
+      priority: 'MEDIUM',
     };
 
     service.update(1, 'New title', 'New description', '2026-02-01').subscribe((task) => {
@@ -53,6 +54,7 @@ describe('TaskService', () => {
       createdAt: '2026-01-01T00:00:00Z',
       dueDate: '2026-03-01',
       overdue: false,
+      priority: 'MEDIUM',
     };
 
     service.create('Title', 'Description', '2026-03-01').subscribe((task) => {

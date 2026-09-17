@@ -11,6 +11,7 @@ export interface Task {
   createdAt: string;
   dueDate: string | null;
   overdue: boolean;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
 @Injectable({ providedIn: 'root' })

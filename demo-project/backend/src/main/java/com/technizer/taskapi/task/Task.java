@@ -29,6 +29,10 @@ public class Task {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Priority priority = Priority.MEDIUM;
+
     public Task() {
     }
 
@@ -96,5 +100,13 @@ public class Task {
 
     public boolean isOverdue() {
         return dueDate != null && !completed && dueDate.isBefore(LocalDate.now());
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 }
