@@ -2,6 +2,7 @@ package com.technizer.taskapi.task;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -22,12 +23,13 @@ public class TaskService {
         return taskRepository.findByOwnerIdAndCompletedTrue(ownerId);
     }
 
-    public Task create(Long ownerId, String title, String description) {
+    public Task create(Long ownerId, String title, String description, LocalDate dueDate) {
         Task task = new Task(title, description, ownerId);
+        task.setDueDate(dueDate);
         return taskRepository.save(task);
     }
 
-    public Task update(Long ownerId, Long taskId, String title, String description) {
+    public Task update(Long ownerId, Long taskId, String title, String description, LocalDate dueDate) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NoSuchElementException("Task not found: " + taskId));
 
@@ -37,6 +39,7 @@ public class TaskService {
 
         task.setTitle(title);
         task.setDescription(description);
+        task.setDueDate(dueDate);
         return taskRepository.save(task);
     }
 

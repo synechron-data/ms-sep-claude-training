@@ -9,6 +9,8 @@ export interface Task {
   completed: boolean;
   ownerId: number;
   createdAt: string;
+  dueDate: string | null;
+  overdue: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -21,12 +23,12 @@ export class TaskService {
     return this.http.get<Task[]>(this.baseUrl);
   }
 
-  create(title: string, description: string): Observable<Task> {
-    return this.http.post<Task>(this.baseUrl, { title, description });
+  create(title: string, description: string, dueDate: string | null): Observable<Task> {
+    return this.http.post<Task>(this.baseUrl, { title, description, dueDate });
   }
 
-  update(id: number, title: string, description: string): Observable<Task> {
-    return this.http.put<Task>(`${this.baseUrl}/${id}`, { title, description });
+  update(id: number, title: string, description: string, dueDate: string | null): Observable<Task> {
+    return this.http.put<Task>(`${this.baseUrl}/${id}`, { title, description, dueDate });
   }
 
   complete(id: number): Observable<Task> {

@@ -3,6 +3,7 @@ package com.technizer.taskapi.task;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "task")
@@ -22,6 +23,8 @@ public class Task {
 
     @Column(nullable = false)
     private Long ownerId;
+
+    private LocalDate dueDate;
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
@@ -81,5 +84,17 @@ public class Task {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public boolean isOverdue() {
+        return dueDate != null && !completed && dueDate.isBefore(LocalDate.now());
     }
 }

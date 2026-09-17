@@ -15,6 +15,8 @@ describe('TaskListComponent', () => {
     completed: false,
     ownerId: 5,
     createdAt: '2026-01-01T00:00:00Z',
+    dueDate: '2026-01-15',
+    overdue: false,
   };
 
   beforeEach(async () => {
@@ -37,6 +39,7 @@ describe('TaskListComponent', () => {
     expect(component.editingTaskId).toBe(task.id);
     expect(component.editTitle).toBe(task.title);
     expect(component.editDescription).toBe(task.description);
+    expect(component.editDueDate).toBe(task.dueDate as string);
   });
 
   it('calls TaskService.update with the edited values and refreshes the list', () => {
@@ -45,9 +48,10 @@ describe('TaskListComponent', () => {
     component.startEdit(task);
     component.editTitle = 'Updated title';
     component.editDescription = 'Updated description';
+    component.editDueDate = '2026-02-01';
     component.saveEdit(task);
 
-    expect(taskService.update).toHaveBeenCalledWith(task.id, 'Updated title', 'Updated description');
+    expect(taskService.update).toHaveBeenCalledWith(task.id, 'Updated title', 'Updated description', '2026-02-01');
     expect(component.editingTaskId).toBeNull();
     expect(taskService.list).toHaveBeenCalledTimes(2);
   });
@@ -66,5 +70,25 @@ describe('TaskListComponent', () => {
 
     expect(component.editingTaskId).toBeNull();
     expect(taskService.update).not.toHaveBeenCalled();
+  });
+
+  it('applies the overdue class to an overdue task', () => {
+    taskService.list.and.returnValue(of([{ ...task, overdue: true }]));
+    component.refresh();
+    fixture.detectChanges();
+
+    const li: HTMLElement = fixture.nativeElement.querySelector('li');
+
+    expect(li.classList).toContain('overdue');
+  });
+
+  it('does not apply the overdue class to a non-overdue task', () => {
+    taskService.list.and.returnValue(of([{ ...task, overdue: false }]));
+    component.refresh();
+    fixture.detectChanges();
+
+    const li: HTMLElement = fixture.nativeElement.querySelector('li');
+
+    expect(li.classList).not.toContain('overdue');
   });
 });

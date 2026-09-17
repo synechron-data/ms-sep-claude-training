@@ -9,6 +9,7 @@ package com.technizer.taskapi.task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -42,7 +43,7 @@ class TaskServiceTest {
         existing.setId(10L);
         when(taskRepository.findById(10L)).thenReturn(Optional.of(existing));
 
-        Task result = taskService.update(1L, 10L, "New title", "New description");
+        Task result = taskService.update(1L, 10L, "New title", "New description", null);
 
         assertThat(result.getTitle()).isEqualTo("New title");
         assertThat(result.getDescription()).isEqualTo("New description");
@@ -52,7 +53,7 @@ class TaskServiceTest {
     void updateThrowsWhenTaskNotFound() {
         when(taskRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> taskService.update(1L, 99L, "New title", "New description"))
+        assertThatThrownBy(() -> taskService.update(1L, 99L, "New title", "New description", null))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -74,7 +75,61 @@ class TaskServiceTest {
         existing.setId(10L);
         when(taskRepository.findById(10L)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> taskService.update(1L, 10L, "New title", "New description"))
+        assertThatThrownBy(() -> taskService.update(1L, 10L, "New title", "New description", null))
                 .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void createPersistsDueDate() {
+        LocalDate dueDate = LocalDate.of(2026, 1, 1);
+
+        Task result = taskService.create(1L, "Title", "Description", dueDate);
+
+        assertThat(result.getDueDate()).isEqualTo(dueDate);
+    }
+
+    @Test
+    void updatePersistsChangedDueDate() {
+        Task existing = new Task("Old title", "Old description", 1L);
+        existing.setId(10L);
+        existing.setDueDate(LocalDate.of(2026, 1, 1));
+        when(taskRepository.findById(10L)).thenReturn(Optional.of(existing));
+
+        LocalDate newDueDate = LocalDate.of(2026, 2, 1);
+        Task result = taskService.update(1L, 10L, "New title", "New description", newDueDate);
+
+        assertThat(result.getDueDate()).isEqualTo(newDueDate);
+    }
+
+    @Test
+    void isOverdueTrueWhenDueDateInPastAndIncomplete() {
+        Task task = new Task("Title", "Description", 1L);
+        task.setDueDate(LocalDate.now().minusDays(1));
+
+        assertThat(task.isOverdue()).isTrue();
+    }
+
+    @Test
+    void isOverdueFalseWhenCompleted() {
+        Task task = new Task("Title", "Description", 1L);
+        task.setDueDate(LocalDate.now().minusDays(1));
+        task.setCompleted(true);
+
+        assertThat(task.isOverdue()).isFalse();
+    }
+
+    @Test
+    void isOverdueFalseWhenDueDateIsNull() {
+        Task task = new Task("Title", "Description", 1L);
+
+        assertThat(task.isOverdue()).isFalse();
+    }
+
+    @Test
+    void isOverdueFalseWhenDueDateInFuture() {
+        Task task = new Task("Title", "Description", 1L);
+        task.setDueDate(LocalDate.now().plusDays(1));
+
+        assertThat(task.isOverdue()).isFalse();
     }
 }
