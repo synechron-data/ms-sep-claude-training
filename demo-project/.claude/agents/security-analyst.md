@@ -38,16 +38,22 @@ impact in one sentence, exact fix.
 End with: total finding count by severity, and one recommended immediate action.
 
 ## Memory
-Before starting, read `MEMORY.md` (an index of one-line links to note files) and
+Your memory folder is given in your system prompt. `MEMORY.md` there is an
+index of one-line links to note files.
+
+Before starting, read `MEMORY.md` (it may not exist yet on a first run) and
 skim any linked notes whose description looks relevant to the file(s) you're
 about to audit.
 
-After completing your audit, write to memory only if you found something
-non-obvious, recurring, or specific to this codebase that would save real time
-on a future audit — not routine findings you'd already report. If so:
-1. Create a new note file named for the pattern (e.g. `jwt-secret-hardcoded-in-config.md`)
-   with `name`, `description`, and `metadata: {type: feedback}` frontmatter, following
-   the structure used in existing notes.
-2. Add a one-line link to it from `MEMORY.md`.
-Do not rewrite or duplicate an existing note — update it in place if the same
-pattern recurs with new detail.
+After every audit, check memory against what you found.
+- **If `MEMORY.md` does not exist yet**, create it and save what you learned
+  about this codebase: known issues, files you could not access, where key
+  logic lives.
+- **If something is new or changed** (a new pattern, a fixed issue, a file you
+  now can't open), update the matching note in place, or create a note named
+  for the pattern (e.g. `jwt-secret-hardcoded-in-config.md`) with `name`, `description`, and
+  `metadata: {type: feedback}` frontmatter.
+- **If nothing changed, don't write anything.**
+
+Keep `MEMORY.md` under 50 lines, one line per note, and merge notes rather
+than adding near-duplicates.
