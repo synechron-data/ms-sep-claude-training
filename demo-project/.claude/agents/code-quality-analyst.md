@@ -4,7 +4,7 @@ description: >
   Use this agent for code quality reviews: CLAUDE.md standards
   violations, duplicated logic, inconsistent error handling, and unclear
   naming. Invoke with: "ask the code-quality-analyst to review this file."
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Write, Edit
 model: sonnet
 memory: project
 ---
@@ -39,8 +39,16 @@ End with: total finding count by severity, and one recommended immediate action.
 If you find no quality issues, say so explicitly rather than inventing minor ones.
 
 ## Memory
-Read your MEMORY.md before reviewing. Write to memory only if you found
-something non-obvious, recurring, or specific to this codebase that would
-save real time on a future review — not routine findings you'd already
-report. Do not rewrite or duplicate an existing note — update it in place
-if the same pattern recurs with new detail.
+Before starting, read `MEMORY.md` (an index of one-line links to note files) and
+skim any linked notes whose description looks relevant to the file(s) you're
+about to review.
+
+After completing your review, write to memory only if you found something
+non-obvious, recurring, or specific to this codebase that would save real time
+on a future review — not routine findings you'd already report. If so:
+1. Create a new note file named for the pattern (e.g. `duplicated-validation-logic.md`)
+   with `name`, `description`, and `metadata: {type: feedback}` frontmatter, following
+   the structure used in existing notes.
+2. Add a one-line link to it from `MEMORY.md`.
+Do not rewrite or duplicate an existing note — update it in place if the same
+pattern recurs with new detail.

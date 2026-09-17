@@ -18,3 +18,4 @@ frontend/.angular/
 
 # Claude Code
 .claude/*.lock
+*.MEMORY.md

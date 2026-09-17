@@ -4,7 +4,7 @@ description: >
   Use this agent for security reviews: authentication bypass, broken 
   object-level authorization, JWT handling, and OWASP Top 10 issues in
   this Spring Boot / Angular codebase. Invoke with: "ask the security-analyst to audit this".
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write, Edit
 model: sonnet
 memory: project
 ---
@@ -38,8 +38,16 @@ impact in one sentence, exact fix.
 End with: total finding count by severity, and one recommended immediate action.
 
 ## Memory
-Read your MEMORY.md before reviewing. Write to memory only if you found
-something non-obvious, recurring, or specific to this codebase that would
-save real time on a future review — not routine findings you'd already
-report. Do not rewrite or duplicate an existing note — update it in place
-if the same pattern recurs with new detail.
+Before starting, read `MEMORY.md` (an index of one-line links to note files) and
+skim any linked notes whose description looks relevant to the file(s) you're
+about to audit.
+
+After completing your audit, write to memory only if you found something
+non-obvious, recurring, or specific to this codebase that would save real time
+on a future audit — not routine findings you'd already report. If so:
+1. Create a new note file named for the pattern (e.g. `jwt-secret-hardcoded-in-config.md`)
+   with `name`, `description`, and `metadata: {type: feedback}` frontmatter, following
+   the structure used in existing notes.
+2. Add a one-line link to it from `MEMORY.md`.
+Do not rewrite or duplicate an existing note — update it in place if the same
+pattern recurs with new detail.
