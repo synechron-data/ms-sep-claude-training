@@ -34,11 +34,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/bash-guard.js"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bash-guard.js\""
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/pretooluse-demo.js"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-demo.js\""
           }
         ]
       }
@@ -50,6 +50,16 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-fix.js\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-log.js\""
           }
         ]
       }

@@ -106,3 +106,67 @@ BLOCK RESPONSE:
     "permissionDecisionReason": "[pretooluse-demo] hook blocked this tool call."
   }
 }
+
+------------------------------------------------------------
+[2026-09-18 11:54:56] mode=log tool=Bash
+STDIN PAYLOAD:
+{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status",
+    "description": "x"
+  }
+}
+
+------------------------------------------------------------
+[2026-09-18 11:54:56] mode=override tool=Bash
+STDIN PAYLOAD:
+{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status",
+    "description": "x"
+  }
+}
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "[pretooluse-demo] hook allowed and overrode this tool call.",
+    "updatedInput": {
+      "command": "echo overridden by custom script",
+      "description": "x"
+    }
+  }
+}
+
+------------------------------------------------------------
+[2026-09-18 11:54:57] mode=block tool=Bash
+STDIN PAYLOAD:
+{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status",
+    "description": "x"
+  }
+}
+BLOCKED: process.exit(2) — see stderr for reason
+
+------------------------------------------------------------
+[2026-09-18 11:54:57] mode=deny tool=Bash
+STDIN PAYLOAD:
+{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status",
+    "description": "x"
+  }
+}
+BLOCK RESPONSE:
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "[pretooluse-demo] hook blocked this tool call."
+  }
+}

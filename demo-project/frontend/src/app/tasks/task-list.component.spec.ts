@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { TaskListComponent } from './task-list.component';
-import { Task, TaskService } from './task.service';
+import { Task, TaskPage, TaskService } from './task.service';
 
 describe('TaskListComponent', () => {
   let fixture: ComponentFixture<TaskListComponent>;
@@ -20,9 +20,26 @@ describe('TaskListComponent', () => {
     priority: 'MEDIUM',
   };
 
+  function pageOf(items: Task[], overrides: Partial<TaskPage> = {}): TaskPage {
+    return {
+      items,
+      page: 0,
+      size: 20,
+      totalElements: items.length,
+      totalPages: 1,
+      ...overrides,
+    };
+  }
+
   beforeEach(async () => {
-    taskService = jasmine.createSpyObj('TaskService', ['list', 'create', 'complete', 'delete', 'update']);
-    taskService.list.and.returnValue(of([task]));
+    taskService = jasmine.createSpyObj('TaskService', [
+      'list',
+      'create',
+      'complete',
+      'delete',
+      'update',
+    ]);
+    taskService.list.and.returnValue(of(pageOf([task])));
 
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
@@ -44,7 +61,13 @@ describe('TaskListComponent', () => {
   });
 
   it('calls TaskService.update with the edited values and refreshes the list', () => {
-    taskService.update.and.returnValue(of({ ...task, title: 'Updated title', description: 'Updated description' }));
+    taskService.update.and.returnValue(
+      of({
+        ...task,
+        title: 'Updated title',
+        description: 'Updated description',
+      }),
+    );
 
     component.startEdit(task);
     component.editTitle = 'Updated title';
@@ -52,7 +75,12 @@ describe('TaskListComponent', () => {
     component.editDueDate = '2026-02-01';
     component.saveEdit(task);
 
-    expect(taskService.update).toHaveBeenCalledWith(task.id, 'Updated title', 'Updated description', '2026-02-01');
+    expect(taskService.update).toHaveBeenCalledWith(
+      task.id,
+      'Updated title',
+      'Updated description',
+      '2026-02-01',
+    );
     expect(component.editingTaskId).toBeNull();
     expect(taskService.list).toHaveBeenCalledTimes(2);
   });
@@ -74,7 +102,7 @@ describe('TaskListComponent', () => {
   });
 
   it('applies the overdue class to an overdue task', () => {
-    taskService.list.and.returnValue(of([{ ...task, overdue: true }]));
+    taskService.list.and.returnValue(of(pageOf([{ ...task, overdue: true }])));
     component.refresh();
     fixture.detectChanges();
 
@@ -84,12 +112,82 @@ describe('TaskListComponent', () => {
   });
 
   it('does not apply the overdue class to a non-overdue task', () => {
-    taskService.list.and.returnValue(of([{ ...task, overdue: false }]));
+    taskService.list.and.returnValue(of(pageOf([{ ...task, overdue: false }])));
     component.refresh();
     fixture.detectChanges();
 
     const li: HTMLElement = fixture.nativeElement.querySelector('li');
 
     expect(li.classList).not.toContain('overdue');
+  });
+
+  it('requests page 0 on load', () => {
+    expect(taskService.list).toHaveBeenCalledWith(
+      jasmine.objectContaining({ page: 0, size: 20 }),
+    );
+  });
+
+  it('goToPage requests the new page and keeps the current filters', () => {
+    component.totalPages = 3;
+    component.priorityFilter = ['HIGH'];
+    component.statusFilter = 'incomplete';
+    component.sortByPriority = true;
+    taskService.list.calls.reset();
+    taskService.list.and.returnValue(of(pageOf([task], { page: 1 })));
+
+    component.goToPage(1);
+
+    expect(component.page).toBe(1);
+    expect(taskService.list).toHaveBeenCalledWith({
+      page: 1,
+      size: 20,
+      priority: ['HIGH'],
+      status: 'incomplete',
+      sort: 'priority',
+    });
+  });
+
+  it('goToPage does nothing when the target page is out of range', () => {
+    component.page = 0;
+    component.totalPages = 1;
+    taskService.list.calls.reset();
+
+    component.goToPage(1);
+
+    expect(component.page).toBe(0);
+    expect(taskService.list).not.toHaveBeenCalled();
+  });
+
+  it('togglePriority adds and removes a priority filter and resets to page 0', () => {
+    component.page = 2;
+    taskService.list.calls.reset();
+    taskService.list.and.returnValue(of(pageOf([task])));
+
+    component.togglePriority('HIGH');
+
+    expect(component.priorityFilter).toEqual(['HIGH']);
+    expect(component.page).toBe(0);
+    expect(taskService.list).toHaveBeenCalledWith(
+      jasmine.objectContaining({ priority: ['HIGH'], page: 0 }),
+    );
+
+    component.togglePriority('HIGH');
+
+    expect(component.priorityFilter).toEqual([]);
+  });
+
+  it('onFilterChange sends status and sort only when set', () => {
+    taskService.list.calls.reset();
+    component.statusFilter = 'complete';
+    component.sortByPriority = true;
+
+    component.onFilterChange();
+
+    expect(taskService.list).toHaveBeenCalledWith({
+      page: 0,
+      size: 20,
+      status: 'complete',
+      sort: 'priority',
+    });
   });
 });
