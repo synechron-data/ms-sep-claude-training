@@ -1,4 +1,7 @@
 {
+  "env": {
+    "SLACK_WEBHOOK_URL": "[Your Slack Webhook URL]"
+  },
   "model": "opusplan",
   "permissions": {
     "allow": [
@@ -60,6 +63,17 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-log.js\""
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/slack-notify.js\""
           }
         ]
       }
