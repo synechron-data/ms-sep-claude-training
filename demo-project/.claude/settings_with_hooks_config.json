@@ -35,6 +35,23 @@
           {
             "type": "command",
             "command": "node .claude/hooks/pretooluse-demo.js"
+          },
+          {
+            "type": "http",
+            "url": "https://example.com/validate"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Evaluate the steps before running the tool"
+          },
+          {
+            "type": "agent",
+            "prompt": "Run the security-analyst to verify the issues"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "some-mcp-server",
+            "tool": "some-mcp-tool"
           }
         ]
       }

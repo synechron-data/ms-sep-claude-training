@@ -1,9 +1,13 @@
 {
-    "model": "sonnet",
-    "permissions": {
-        "allow": [
-            "Bash(npm install *)",
-            "Bash(curl:*)"
-        ]
-    }
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(curl:*)"
+    ]
+  },
+  "model": "sonnet",
+  "enabledMcpjsonServers": [
+    "atlassian",
+    "github"
+  ]
 }

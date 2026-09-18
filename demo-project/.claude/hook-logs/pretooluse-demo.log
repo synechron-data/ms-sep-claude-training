@@ -1,0 +1,108 @@
+
+------------------------------------------------------------
+[2026-09-18 10:44:56] tool=Bash
+STDIN PAYLOAD:
+{
+  "session_id": "7fe5a8df-4913-43ca-a12d-0335f1e5485f",
+  "transcript_path": "C:\\Users\\manis\\.claude\\projects\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f.jsonl",
+  "cwd": "D:\\Github - Manish\\ms-sep-claude-training\\demo-project",
+  "scratchpad_dir": "C:\\Users\\manis\\AppData\\Local\\Temp\\claude\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f\\scratchpad",
+  "prompt_id": "a45a1a6e-b92d-49c2-a902-f1ef0aa14b94",
+  "permission_mode": "auto",
+  "effort": {
+    "level": "medium"
+  },
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "echo Hello",
+    "description": "Print Hello"
+  },
+  "tool_use_id": "toolu_014jDgw7uhwxWcZnNH3f7NMC"
+}
+
+------------------------------------------------------------
+[2026-09-18 10:48:18] tool=Bash
+STDIN PAYLOAD:
+{
+  "session_id": "7fe5a8df-4913-43ca-a12d-0335f1e5485f",
+  "transcript_path": "C:\\Users\\manis\\.claude\\projects\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f.jsonl",
+  "cwd": "D:\\Github - Manish\\ms-sep-claude-training\\demo-project",
+  "scratchpad_dir": "C:\\Users\\manis\\AppData\\Local\\Temp\\claude\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f\\scratchpad",
+  "prompt_id": "48816b6a-4b8f-465e-8a9c-75c6730411ba",
+  "permission_mode": "auto",
+  "effort": {
+    "level": "medium"
+  },
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "echo Hello",
+    "description": "Print Hello"
+  },
+  "tool_use_id": "toolu_01VwnYKAgkvATQXMxoaL3ySH"
+}
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "[pretooluse-demo] hook allowed and overrode this tool call.",
+    "updatedInput": {
+      "command": "echo overridden by custom script",
+      "description": "Print Hello"
+    }
+  }
+}
+
+------------------------------------------------------------
+[2026-09-18 10:50:36] tool=Bash
+STDIN PAYLOAD:
+{
+  "session_id": "7fe5a8df-4913-43ca-a12d-0335f1e5485f",
+  "transcript_path": "C:\\Users\\manis\\.claude\\projects\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f.jsonl",
+  "cwd": "D:\\Github - Manish\\ms-sep-claude-training\\demo-project",
+  "scratchpad_dir": "C:\\Users\\manis\\AppData\\Local\\Temp\\claude\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f\\scratchpad",
+  "prompt_id": "e6b7be7a-bb3e-425b-b36d-059016db1c7f",
+  "permission_mode": "auto",
+  "effort": {
+    "level": "medium"
+  },
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "echo Hello",
+    "description": "Print Hello"
+  },
+  "tool_use_id": "toolu_01K9vugiPv6uAXwSBJKZR2Qq"
+}
+BLOCKED: process.exit(2) — see stderr for reason
+
+------------------------------------------------------------
+[2026-09-18 10:52:44] tool=Bash
+STDIN PAYLOAD:
+{
+  "session_id": "7fe5a8df-4913-43ca-a12d-0335f1e5485f",
+  "transcript_path": "C:\\Users\\manis\\.claude\\projects\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f.jsonl",
+  "cwd": "D:\\Github - Manish\\ms-sep-claude-training\\demo-project",
+  "scratchpad_dir": "C:\\Users\\manis\\AppData\\Local\\Temp\\claude\\D--Github---Manish-ms-sep-claude-training-demo-project\\7fe5a8df-4913-43ca-a12d-0335f1e5485f\\scratchpad",
+  "prompt_id": "d0ad454b-186e-4101-86b3-e1780ee4f024",
+  "permission_mode": "auto",
+  "effort": {
+    "level": "medium"
+  },
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "echo Hello",
+    "description": "Print Hello"
+  },
+  "tool_use_id": "toolu_012r7G3TGEr3DrkM7BnTS1Xq"
+}
+BLOCK RESPONSE:
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "[pretooluse-demo] hook blocked this tool call."
+  }
+}
