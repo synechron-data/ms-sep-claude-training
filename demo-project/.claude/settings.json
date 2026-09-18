@@ -34,6 +34,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node .claude/hooks/bash-guard.js"
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/pretooluse-demo.js"
           }
         ]
