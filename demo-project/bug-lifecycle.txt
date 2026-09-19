@@ -1,0 +1,6 @@
+1. /security-review audit "d:\Github - Manish\ms-sep-claude-training\demo-project\backend\src\main\java\com\technizer\taskapi\task\TaskService.java"
+2. /create-issue on GitHub, for the delete lacks ownership check finding
+3. /fix-issue #2
+4. /commit closes #2
+5. /raise-pr
+6. /standup
