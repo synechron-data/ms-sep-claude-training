@@ -1,0 +1,17 @@
+{
+    "name": "sync-plugin-marketplace",
+    "metadata": {
+        "description": "Standard Claude Code setup for internal Synechron Team"
+    },
+    "owner": {
+        "name": "Synechron AI Team"
+    },
+    "plugins": [
+        {
+            "name": "sync-plugin",
+            "source": "./",
+            "description": "Standard Claude Code setup for internal Synechron Team",
+            "version": "1.0.0"
+        }
+    ]
+}
