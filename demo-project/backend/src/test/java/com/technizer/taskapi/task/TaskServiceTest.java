@@ -8,10 +8,12 @@ package com.technizer.taskapi.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -247,5 +249,41 @@ class TaskServiceTest {
     PagedTasks result = taskService.listForOwner(1L, null, null, true, 0, 2);
 
     assertThat(result.items()).containsExactly(high, medium);
+  }
+
+  @Test
+  void deleteRemovesTaskWhenCallerOwnsIt() {
+    Task existing = new Task("Title", "Description", 1L);
+    existing.setId(10L);
+    when(taskRepository.findByIdAndOwnerId(10L, 1L)).thenReturn(Optional.of(existing));
+
+    taskService.delete(1L, 10L);
+
+    verify(taskRepository).delete(existing);
+  }
+
+  @Test
+  void deleteThrowsAndDeletesNothingWhenCallerDoesNotOwnTask() {
+    // Task 10 belongs to user 2; the scoped lookup for user 1 finds nothing.
+    when(taskRepository.findByIdAndOwnerId(10L, 1L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> taskService.delete(1L, 10L))
+        .isInstanceOf(NoSuchElementException.class);
+
+    verify(taskRepository, never()).delete(any(Task.class));
+    verify(taskRepository, never()).deleteById(any());
+  }
+
+  @Test
+  void deleteThrowsSameMessageForMissingTaskAndForeignTask() {
+    when(taskRepository.findByIdAndOwnerId(any(), any())).thenReturn(Optional.empty());
+
+    Throwable missing = catchThrowable(() -> taskService.delete(1L, 99L));
+    Throwable foreign = catchThrowable(() -> taskService.delete(1L, 10L));
+
+    assertThat(missing).isInstanceOf(NoSuchElementException.class);
+    assertThat(foreign).isInstanceOf(NoSuchElementException.class);
+    assertThat(missing).hasMessage(foreign.getMessage());
+    assertThat(missing.getMessage()).doesNotContain("99").doesNotContain("10");
   }
 }
