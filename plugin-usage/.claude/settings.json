@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "sync-plugin-marketplace": {
+      "source": {
+        "source": "directory",
+        "path": "d:\\Github - Manish\\ms-sep-claude-training\\demo-project\\sync-plugin"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "sync-plugin@sync-plugin-marketplace": true
+  }
+}
