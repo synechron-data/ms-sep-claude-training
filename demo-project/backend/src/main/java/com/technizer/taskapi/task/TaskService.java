@@ -97,6 +97,13 @@ public class TaskService {
   }
 
   public void delete(Long ownerId, Long taskId) {
-    taskRepository.deleteById(taskId);
+    taskRepository.delete(findOwned(ownerId, taskId));
+  }
+
+  // Same "not found" for a missing task and someone else's task, so IDs can't be probed.
+  private Task findOwned(Long ownerId, Long taskId) {
+    return taskRepository
+        .findByIdAndOwnerId(taskId, ownerId)
+        .orElseThrow(() -> new NoSuchElementException("Task not found"));
   }
 }
