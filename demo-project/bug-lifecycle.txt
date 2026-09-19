@@ -1,0 +1,34 @@
+1. /security-review audit "d:\Github - Manish\ms-sep-claude-training\demo-project\backend\src\main\java\com\technizer\taskapi\task\TaskService.java"
+2. /create-issue on GitHub, for the delete lacks ownership check finding
+3. /fix-issue #2
+4. /commit closes #2
+5. /raise-pr
+6. /standup
+
+Enable CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS in settings.json
+
+Spawn three teammates to review the PR #3:
+  - security-reviewer: focused exclusively on security implications
+  - perf-reviewer: focused on performance and scalability
+  - tc-reviewer: validating test coverage and edge cases
+Have them each review independently, then synthesize findings into one report.
+
+---------------------------------------------
+Add Jira
+
+Spawn three teammates to review PR #<number>, which fixes Jira TASK-1.
+First, read TASK-1 from Jira and give each teammate its summary and acceptance criteria.
+
+- security-reviewer: use the security-analyst agent type. Focus only on security:
+  does the fix fully close the issue in TASK-1, and does it add any new bypass?
+- perf-reviewer: use the performance-analyst agent type. Focus on performance and
+  scalability: extra queries, per-request overhead in the filter chain, N+1.
+- tc-reviewer: use the test-coverage-analyst agent type. Check test coverage and edge
+  cases, and map every acceptance criterion in TASK-1 to a test. List any criterion
+  with no test.
+
+Have them review independently. Then write one report grouped by severity
+(Critical / High / Medium / Low), with a line for each TASK-1 acceptance criterion: met / not met.
+
+Post the report as a comment on PR #<number>, and add a one-paragraph summary as a
+comment on Jira TASK-1.
