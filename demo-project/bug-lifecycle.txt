@@ -4,3 +4,10 @@
 4. /commit closes #2
 5. /raise-pr
 6. /standup
+
+Enable CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS in settings.json
+
+Spawn three teammates to review the PR #3:
+  - security-reviewer: focused exclusively on security implications
+  - perf-reviewer: focused on performance and scalability
+  - tc-reviewer: validating test coverage and edge cases
